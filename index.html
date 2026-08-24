@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial LIVE — Portal de Clientes · FCR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Inter:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#698A34; --green-d:#49652E; --green-br:#8CAD4E; --green-2:#AEC87D; --green-3:#D4E1B1;
+    --green-wash:#EEF3E2;
+    --ink:#333133; --ink-2:#3F3F41; --charcoal:#2E2D2F;
+    --bg:#F4F5F1; --surface:#FFFFFF; --line:#E6E8E0; --line-2:#EFF1EA;
+    --text:#33353A; --muted:#71757A; --faint:#A2A6A0;
+    --warn:#C8912E; --warn-wash:#F7EDD6;
+    --neg:#C15B4A; --neg-wash:#F8E9E5;
+    --radius:13px;
+    --shadow:0 1px 2px rgba(51,49,51,.04),0 6px 22px rgba(51,49,51,.06);
+    --font:'Inter',system-ui,sans-serif; --display:'Barlow',system-ui,sans-serif;
+    --cond:'Barlow Semi Condensed',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+
+  /* Sidebar (charcoal, per brand guide "logo sobre fondo oscuro") */
+  .side{background:var(--charcoal);color:#C7C7C5;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:20px 20px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo-svg{width:38px;height:30px;flex:0 0 auto}
+  .brand-txt{line-height:1}
+  .brand-name{font-family:var(--cond);font-weight:700;color:#fff;font-size:19px;letter-spacing:.5px}
+  .brand-sub{font-size:8.5px;color:var(--green-2);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px;font-weight:600}
+  .nav{padding:16px 12px;flex:1;overflow-y:auto}
+  .nav-label{font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#7C7C7A;padding:12px 12px 8px}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;color:#C7C7C5;cursor:pointer;font-weight:450;font-size:13.5px;border:none;background:none;width:100%;text-align:left;transition:background .15s,color .15s}
+  .nav-item svg{width:17px;height:17px;flex:0 0 auto;opacity:.8}
+  .nav-item:hover{background:rgba(255,255,255,.05);color:#fff}
+  .nav-item.active{background:rgba(140,173,78,.18);color:#fff;box-shadow:inset 2px 0 0 var(--green-br)}
+  .nav-item.active svg{opacity:1;color:var(--green-br)}
+  .nav-badge{margin-left:auto;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px}
+  .side-foot{padding:15px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#9A9A98}
+  .side-foot b{color:var(--green-2);font-weight:600}
+
+  /* Topbar */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .top{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 30px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:20}
+  .client{display:flex;align-items:center;gap:13px}
+  .client-logo{width:42px;height:42px;border-radius:10px;background:var(--green-wash);border:1px solid var(--green-3);color:var(--green-d);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px}
+  .client-name{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.1px;color:var(--ink)}
+  .client-meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .sync{display:flex;align-items:center;gap:7px;background:var(--green-wash);color:var(--green-d);font-size:12px;font-weight:500;padding:6px 13px;border-radius:20px;border:1px solid var(--green-3)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(105,138,52,.18)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--green-wash);border:1px solid var(--green-3);color:var(--green-d);display:grid;place-items:center;font-weight:600;font-size:13px}
+
+  .content{padding:26px 30px 60px;max-width:1180px;width:100%}
+  .view{display:none;animation:fade .4s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  .page-head{margin-bottom:20px}
+  .page-title{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:.1px;color:var(--ink)}
+  .page-title em{font-style:normal;color:var(--green)}
+  .page-sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .grid{display:grid;gap:16px}
+  .kpis{grid-template-columns:repeat(4,1fr);margin-bottom:16px}
+  .kpi{padding:18px 19px}
+  .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+  .kpi-ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--green-wash);color:var(--green-d)}
+  .kpi-ic svg{width:16px;height:16px}
+  .kpi-val{font-family:var(--display);font-weight:700;font-size:25px;letter-spacing:.2px;color:var(--ink)}
+  .kpi-delta{font-size:11.5px;font-weight:500;margin-top:7px;display:inline-flex;align-items:center;gap:4px}
+  .up{color:var(--green-d)} .down{color:var(--neg)}
+
+  .row-2{grid-template-columns:1.6fr 1fr}
+  .row-2b{grid-template-columns:1fr 1fr}
+  .card-h{padding:16px 19px 0;display:flex;align-items:center;justify-content:space-between}
+  .card-t{font-family:var(--display);font-weight:600;font-size:15.5px;color:var(--ink)}
+  .card-b{padding:16px 19px}
+  .pill{font-size:11px;font-weight:500;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:4px 11px;border-radius:20px;cursor:pointer}
+
+  /* Chart */
+  .chart{display:flex;align-items:flex-end;gap:14px;height:190px;padding-top:14px}
+  .bargroup{flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;height:100%;justify-content:flex-end}
+  .bars{display:flex;gap:5px;align-items:flex-end;height:100%;width:100%;justify-content:center}
+  .bar{width:16px;border-radius:4px 4px 0 0;transition:height .7s cubic-bezier(.2,.8,.2,1)}
+  .bar.inc{background:linear-gradient(180deg,var(--green-br),var(--green))}
+  .bar.egr{background:linear-gradient(180deg,#6B6A6C,#464547)}
+  .bar-x{font-size:11px;color:var(--muted);font-weight:500}
+  .legend{display:flex;gap:18px;font-size:11.5px;color:var(--muted);margin-top:4px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .lg{width:9px;height:9px;border-radius:2px}
+
+  /* Semaforo */
+  .status-list{display:flex;flex-direction:column;gap:2px}
+  .status-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-2)}
+  .status-item:last-child{border-bottom:none}
+  .s-ic{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+  .s-ic svg{width:14px;height:14px}
+  .s-ok{background:var(--green-wash);color:var(--green-d)}
+  .s-warn{background:var(--warn-wash);color:var(--warn)}
+  .s-txt{font-size:13px;font-weight:500;color:var(--ink)}
+  .s-sub{font-size:11.5px;color:var(--muted)}
+  .s-state{margin-left:auto;font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:20px}
+  .st-ok{background:var(--green-wash);color:var(--green-d)}
+  .st-warn{background:var(--warn-wash);color:var(--warn)}
+
+  /* Deadline banner */
+  .deadline{background:linear-gradient(120deg,var(--charcoal),#403F41);color:#fff;border-radius:var(--radius);padding:19px 23px;display:flex;align-items:center;gap:22px;margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+  .deadline::after{content:"";position:absolute;right:-50px;top:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(140,173,78,.28),transparent 70%)}
+  .dl-count{font-family:var(--display);font-weight:700;font-size:38px;line-height:1;position:relative;color:var(--green-br)}
+  .dl-count small{display:block;font-size:10.5px;font-weight:500;color:#B9BAB6;letter-spacing:1.4px;text-transform:uppercase;margin-top:6px}
+  .dl-mid{position:relative}
+  .dl-mid h4{font-family:var(--display);font-size:16px;font-weight:600;margin-bottom:4px}
+  .dl-mid p{font-size:12.5px;color:#C4C5C1}
+  .dl-btn{margin-left:auto;position:relative;background:var(--green);color:#fff;border:none;padding:10px 19px;border-radius:7px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:var(--font);transition:transform .12s,background .15s}
+  .dl-btn:hover{background:var(--green-d);transform:translateY(-1px)}
+
+  /* Tables */
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--faint);font-weight:600;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:13px 14px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  tr:hover td{background:#FAFBF7}
+  .t-strong{font-weight:600;color:var(--ink)}
+  .badge{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block}
+  .b-ok{background:var(--green-wash);color:var(--green-d)}
+  .b-warn{background:var(--warn-wash);color:var(--warn)}
+  .b-red{background:var(--neg-wash);color:var(--neg)}
+  .b-green{background:var(--green-wash);color:var(--green-d)}
+  .b-gray{background:var(--bg);color:var(--muted)}
+  .dl-link{display:inline-flex;align-items:center;gap:5px;color:var(--green-d);font-weight:500;font-size:12.5px;cursor:pointer;background:none;border:none;font-family:var(--font)}
+  .dl-link:hover{color:var(--green);text-decoration:underline}
+  .dl-link svg{width:14px;height:14px}
+  .money{font-variant-numeric:tabular-nums;font-weight:500}
+
+  /* Tabs */
+  .tabs{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px;margin-bottom:16px}
+  .tab{padding:7px 16px;border-radius:6px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--font)}
+  .tab.active{background:var(--surface);color:var(--green-d);box-shadow:var(--shadow)}
+
+  /* Doc grid */
+  .doc-grid{grid-template-columns:repeat(3,1fr)}
+  .doc-card{padding:19px;cursor:pointer;transition:transform .14s,box-shadow .14s,border-color .14s}
+  .doc-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(51,49,51,.10);border-color:var(--green-2)}
+  .doc-ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;margin-bottom:14px;background:var(--green-wash);color:var(--green-d)}
+  .doc-ic svg{width:22px;height:22px}
+  .doc-t{font-family:var(--display);font-weight:600;font-size:15px;margin-bottom:4px;color:var(--ink)}
+  .doc-d{font-size:12px;color:var(--muted);line-height:1.45}
+  .doc-meta{margin-top:13px;padding-top:13px;border-top:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--green-d)}
+
+  /* Assistant */
+  .assist{background:linear-gradient(120deg,var(--green),var(--green-d));border-radius:var(--radius);padding:21px 23px;margin-bottom:16px;color:#fff;box-shadow:var(--shadow)}
+  .assist h3{font-family:var(--display);font-size:16px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+  .assist p{font-size:12.5px;color:#E4EFD3;margin-bottom:15px}
+  .qa-row{display:flex;flex-wrap:wrap;gap:9px}
+  .qa{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);color:#fff;padding:8px 15px;border-radius:20px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .15s,color .15s}
+  .qa:hover{background:#fff;color:var(--green-d)}
+
+  /* Info list */
+  .info-list{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .info-cell{background:var(--surface);padding:14px 16px}
+  .info-k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:5px}
+  .info-v{font-size:13.5px;font-weight:500;color:var(--ink)}
+  .full{grid-column:1/-1}
+
+  /* Timeline */
+  .tl{position:relative;padding-left:26px}
+  .tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:1.5px;background:var(--line)}
+  .tl-item{position:relative;padding:0 0 20px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-dot{position:absolute;left:-22px;top:2px;width:13px;height:13px;border-radius:50%;background:var(--surface);border:2.5px solid var(--green)}
+  .tl-dot.warn{border-color:var(--warn)} .tl-dot.br{border-color:var(--green-br)}
+  .tl-date{font-size:10.5px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+  .tl-t{font-size:13.5px;font-weight:600;margin:3px 0;color:var(--ink)}
+  .tl-d{font-size:12.5px;color:var(--muted)}
+
+  .note{font-size:11.5px;color:var(--faint);margin-top:14px;display:flex;align-items:center;gap:7px}
+  .note svg{width:14px;height:14px;flex:0 0 auto}
+
+  .banner-proto{background:var(--warn-wash);color:#8A5E12;border:1px solid #EBD9AE;border-radius:9px;padding:10px 15px;font-size:12px;margin-bottom:18px;display:flex;align-items:center;gap:9px}
+  .banner-proto svg{width:15px;height:15px;flex:0 0 auto}
+
+  @media(max-width:920px){
+    .app{grid-template-columns:1fr}
+    .side{position:fixed;left:0;top:0;bottom:0;width:250px;transform:translateX(-100%);transition:transform .25s;z-index:50}
+    .side.open{transform:none}
+    .kpis{grid-template-columns:1fr 1fr}
+    .row-2,.row-2b,.doc-grid,.info-list{grid-template-columns:1fr}
+    .hamb{display:grid!important}
+  }
+  .hamb{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);place-items:center;cursor:pointer;color:var(--ink)}
+  .hamb svg{width:18px;height:18px}
+</style>
+
+<style>
+  #gate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:linear-gradient(155deg,#49652E 0%,#3C5526 55%,#2E2D2F 100%);font-family:'Inter',system-ui,sans-serif}
+  #gate .card{background:#fff;border-radius:18px;width:100%;max-width:392px;padding:34px 30px 28px;
+    box-shadow:0 24px 60px rgba(0,0,0,.28)}
+  #gate .brand{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+  #gate .mark{width:36px;height:36px;border-radius:9px;background:#698A34;position:relative;flex:none}
+  #gate .mark i{position:absolute;bottom:9px;width:4px;border-radius:1.5px;background:#fff;display:block}
+  #gate .mark i:nth-child(1){left:9px;height:8px}
+  #gate .mark i:nth-child(2){left:15px;height:13px;opacity:.85}
+  #gate .mark i:nth-child(3){left:21px;height:18px;opacity:.7}
+  #gate .brand b{font-family:'Barlow',sans-serif;font-size:.98rem;line-height:1.15;display:block;color:#333133}
+  #gate .brand span{font-size:.7rem;color:#71757A;display:block;letter-spacing:.03em}
+  #gate h1{font-family:'Barlow',sans-serif;font-size:1.42rem;color:#333133;margin-bottom:5px}
+  #gate p.sub{font-size:.88rem;color:#71757A;margin-bottom:22px;line-height:1.5}
+  #gate label{display:block;font-size:.76rem;font-weight:600;color:#71757A;margin-bottom:6px}
+  #gate .f{margin-bottom:13px}
+  #gate input{width:100%;padding:11px 13px;border:1px solid #E6E8E0;border-radius:10px;font:inherit;
+    font-size:.93rem;background:#F8F9F5;color:#333133}
+  #gate input:focus{outline:2px solid #8CAD4E;border-color:transparent;background:#fff}
+  #gate .btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;
+    font:inherit;font-size:.94rem;font-weight:600;padding:12px 18px;border-radius:10px;background:#698A34;color:#fff;
+    transition:background .15s}
+  #gate .btn:hover{background:#49652E}
+  #gate .btn.ghost{background:#fff;color:#49652E;border:1.5px solid #AEC87D;margin-top:0}
+  #gate .btn.ghost:hover{background:#EEF3E2}
+  #gate .divider{display:flex;align-items:center;gap:10px;margin:18px 0 14px;color:#A2A6A0;font-size:.72rem;
+    letter-spacing:.08em;text-transform:uppercase}
+  #gate .divider::before,#gate .divider::after{content:"";flex:1;height:1px;background:#EFF1EA}
+  #gate .msg{display:none;margin-top:14px;padding:11px 13px;border-radius:9px;background:#F7EDD6;color:#8A6410;
+    font-size:.84rem;line-height:1.45}
+  #gate .foot{margin-top:20px;font-size:.74rem;color:#A2A6A0;text-align:center;line-height:1.5}
+  #gate .foot a{color:#698A34;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="card">
+    <div class="brand">
+      <span class="mark"><i></i><i></i><i></i></span>
+      <span>
+        <b>Financial LIVE</b>
+        <span>Portal de clientes · FCR</span>
+      </span>
+    </div>
+    <h1>Entra a tu información</h1>
+    <p class="sub">Consulta tus ingresos, facturas, impuestos y expediente fiscal cuando lo necesites.</p>
+    <form onsubmit="return gateLogin(event)">
+      <div class="f"><label>Correo</label><input type="email" id="gate_user" placeholder="nombre@empresa.com" required></div>
+      <div class="f"><label>Contraseña</label><input type="password" id="gate_pass" placeholder="••••••••" required></div>
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+    <div id="gate_msg" class="msg"></div>
+    <div class="divider">o</div>
+    <button class="btn ghost" onclick="verPrototipo()">Ver prototipo</button>
+    <div class="foot">
+      ¿Aún no tienes acceso?<br>
+      Escríbenos a <a href="mailto:fonseca@financialcr.com">fonseca@financialcr.com</a>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand">
+      <svg class="logo-svg" viewBox="0 0 42 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="14" width="6" height="10" rx="1" fill="#8CAD4E"/>
+        <rect x="16" y="8" width="6" height="16" rx="1" fill="#698A34"/>
+        <rect x="24" y="4" width="6" height="20" rx="1" fill="#8CAD4E"/>
+        <path d="M5 27 L34 27" stroke="#698A34" stroke-width="2" stroke-linecap="round"/>
+        <path d="M5 27 L9 23" stroke="#698A34" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-txt">
+        <div class="brand-name">FINANCIAL</div>
+        <div class="brand-sub">Controlling &amp; Reporting</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">Principal</div>
+      <button class="nav-item active" data-view="resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Resumen</button>
+      <button class="nav-item" data-view="flujo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>Ingresos y Egresos</button>
+      <button class="nav-item" data-view="facturas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>Facturas</button>
+      <button class="nav-item" data-view="impuestos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Impuestos y Declaraciones<span class="nav-badge">1</span></button>
+      <div class="nav-label">Documentos</div>
+      <button class="nav-item" data-view="documentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 3h8a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Expediente Fiscal</button>
+      <button class="nav-item" data-view="fiscal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01M12 9h.01M15 9h.01M9 13h.01M12 13h.01M15 13h.01"/></svg>Datos ante el SAT</button>
+      <button class="nav-item" data-view="historial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9 9 0 00-9 9z"/><path d="M12 7v5l3 2"/></svg>Historial</button>
+    </nav>
+    <div class="side-foot">
+      Atendido por <b>Financial Controlling &amp; Reporting</b><br>Contador asignado: <b>Equipo FCR</b>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <button class="hamb" onclick="document.getElementById('side').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <div class="client">
+        <div class="client-logo">ED</div>
+        <div>
+          <div class="client-name">Empresa Demo, S.A. de C.V.</div>
+          <div class="client-meta">RFC: DEM250101QX8 · Régimen General de Ley (601)</div>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="sync"><span class="dot"></span> ContaLink · actualizado hoy 06:00</div>
+        <div class="avatar">DM</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+    <!-- RESUMEN -->
+    <section class="view active" id="resumen">
+      <div class="banner-proto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
+        Prototipo de demostración · datos de ejemplo. La información real se alimentaría desde ContaLink (API) y el expediente en Drive.
+      </div>
+      <div class="page-head">
+        <div class="page-title">Hola, <em>Demo</em></div>
+        <div class="page-sub">Estado de Empresa Demo al 18 de julio de 2026.</div>
+      </div>
+
+      <div class="deadline">
+        <div class="dl-count">6<small>días</small></div>
+        <div class="dl-mid">
+          <h4>Próximo vencimiento: Declaración mensual (ISR e IVA) — Junio 2026</h4>
+          <p>Fecha límite de presentación y pago: <b style="color:var(--green-br)">23 de julio de 2026</b> · Importe estimado: $18,540 MXN</p>
+        </div>
+        <button class="dl-btn" onclick="go('impuestos')">Ver detalle</button>
+      </div>
+
+      <div class="grid kpis">
+        <div class="card kpi">
+          <div class="kpi-top"><span class="kpi-label">Ingresos del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
+          <div class="kpi-val tnum">$486,200</div>
+          <div class="kpi-delta up">▲ 12.4% vs. mayo</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-top"><span class="kpi-label">Egresos del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span></div>
+          <div class="kpi-val tnum">$312,850</div>
+          <div class="kpi-delta down">▲ 4.1% vs. mayo</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-top"><span class="kpi-label">Resultado del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-6"/></svg></span></div>
+          <div class="kpi-val tnum">$173,350</div>
+          <div class="kpi-delta up">▲ 28.9% margen</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-top"><span class="kpi-label">Impuestos estimados</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span></div>
+          <div class="kpi-val tnum">$18,540</div>
+          <div class="kpi-delta" style="color:var(--warn)">vence en 6 días</div>
+        </div>
+      </div>
+
+      <div class="grid row-2">
+        <div class="card">
+          <div class="card-h"><span class="card-t">Ingresos vs. Egresos</span><span class="pill">Últimos 6 meses</span></div>
+          <div class="card-b">
+            <div class="chart" id="chart"></div>
+            <div class="legend"><span><i class="lg" style="background:var(--green)"></i>Ingresos</span><span><i class="lg" style="background:#5B5A5C"></i>Egresos</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="card-t">Cumplimiento</span></div>
+          <div class="card-b">
+            <div class="status-list">
+              <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Contabilidad al día</div><div class="s-sub">Última carga: 17 jul</div></div><span class="s-state st-ok">OK</span></div>
+              <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Declaración de mayo</div><div class="s-sub">Presentada 21 jun</div></div><span class="s-state st-ok">OK</span></div>
+              <div class="status-item"><span class="s-ic s-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 8v4M12 16h.01"/></svg></span><div><div class="s-txt">Declaración de junio</div><div class="s-sub">Por presentar · vence 23 jul</div></div><span class="s-state st-warn">Pendiente</span></div>
+              <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Opinión de cumplimiento</div><div class="s-sub">Positiva · SAT 32-D</div></div><span class="s-state st-ok">Positiva</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="assist" style="margin-top:16px">
+        <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 2 1 3.5 2.5 5S9 21 12 21s4-1.5 4.5-3 2.5-2 2.5-6a7 7 0 00-7-7z"/></svg> ¿Qué necesitas hoy?</h3>
+        <p>Accede en un clic a lo que más piden nuestros clientes.</p>
+        <div class="qa-row">
+          <button class="qa" onclick="go('fiscal')">Descargar mi e.firma (FIEL)</button>
+          <button class="qa" onclick="go('facturas')">Necesito una factura</button>
+          <button class="qa" onclick="go('impuestos')">Revisar mi declaración</button>
+          <button class="qa" onclick="go('impuestos')">¿Cuánto pagué de impuestos?</button>
+          <button class="qa" onclick="go('fiscal')">Mi domicilio ante el SAT</button>
+          <button class="qa" onclick="go('impuestos')">¿Cuándo vence mi próximo pago?</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLUJO -->
+    <section class="view" id="flujo">
+      <div class="page-head"><div class="page-title">Ingresos y <em>Egresos</em></div><div class="page-sub">Flujo casi en tiempo real, sincronizado a diario desde ContaLink.</div></div>
+      <div class="grid kpis" style="grid-template-columns:repeat(3,1fr)">
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Ingresos 2026</span></div><div class="kpi-val tnum">$2,914,600</div><div class="kpi-delta up">▲ 9.7% vs. 2025</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Egresos 2026</span></div><div class="kpi-val tnum">$1,987,200</div><div class="kpi-delta down">▲ 6.2% vs. 2025</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Utilidad acumulada</span></div><div class="kpi-val tnum">$927,400</div><div class="kpi-delta up">▲ 31.8% margen</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">Movimientos recientes</span><span class="pill">Junio 2026</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Contraparte</th><th style="text-align:right">Monto</th><th>Origen</th></tr></thead>
+          <tbody id="mov-body"></tbody>
+        </table></div>
+      </div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Los movimientos combinan CFDI emitidos/recibidos y movimientos bancarios conciliados en ContaLink.</div>
+    </section>
+
+    <!-- FACTURAS -->
+    <section class="view" id="facturas">
+      <div class="page-head"><div class="page-title"><em>Facturas</em></div><div class="page-sub">Todas tus facturas emitidas y recibidas, con descarga de XML y PDF.</div></div>
+      <div class="tabs">
+        <button class="tab active" data-fac="emitidas">Emitidas (43)</button>
+        <button class="tab" data-fac="recibidas">Recibidas (128)</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Fecha</th><th>Folio / UUID</th><th>Cliente / Proveedor</th><th style="text-align:right">Total</th><th>Estatus</th><th style="text-align:right">Descargar</th></tr></thead>
+          <tbody id="fac-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- IMPUESTOS -->
+    <section class="view" id="impuestos">
+      <div class="page-head"><div class="page-title">Impuestos y <em>Declaraciones</em></div><div class="page-sub">Qué se presentó, cuándo, cuánto se pagó y qué viene.</div></div>
+
+      <div class="deadline" style="margin-bottom:20px">
+        <div class="dl-count">6<small>días</small></div>
+        <div class="dl-mid"><h4>Declaración mensual Junio 2026 — por presentar</h4><p>Vence el <b style="color:var(--green-br)">23 jul 2026</b> · ISR estimado $14,900 · IVA estimado $3,640</p></div>
+        <button class="dl-btn">Descargar cálculo</button>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-h"><span class="card-t">Declaraciones mensuales 2026</span><span class="pill">RESICO / General</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Periodo</th><th style="text-align:right">ISR</th><th style="text-align:right">IVA</th><th>Fecha límite</th><th>Presentada</th><th>Pagada</th><th>Estatus</th><th>Acuse</th></tr></thead>
+          <tbody id="imp-body"></tbody>
+        </table></div>
+      </div>
+
+      <div class="grid row-2b">
+        <div class="card">
+          <div class="card-h"><span class="card-t">Declaración anual</span></div>
+          <div class="card-b">
+            <div class="status-item" style="border-bottom:1px solid var(--line-2)"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Ejercicio 2025</div><div class="s-sub">Presentada 28 mar 2026 · ISR $142,300</div></div><button class="dl-link" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Acuse</button></div>
+            <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Ejercicio 2024</div><div class="s-sub">Presentada 31 mar 2025 · ISR $118,900</div></div><button class="dl-link" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Acuse</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="card-t">Total pagado 2026</span></div>
+          <div class="card-b">
+            <div style="display:flex;align-items:baseline;gap:8px"><span class="kpi-val tnum" style="font-size:32px">$96,120</span><span style="color:var(--muted);font-size:13px">MXN</span></div>
+            <div style="margin-top:15px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">ISR provisional</span><b class="tnum">$78,340</b></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">IVA a cargo</span><b class="tnum">$17,780</b></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Retenciones</span><b class="tnum">$0</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCUMENTOS -->
+    <section class="view" id="documentos">
+      <div class="page-head"><div class="page-title">Expediente <em>Fiscal</em></div><div class="page-sub">Tu Drive contable-fiscal: todo tu papeleo, ordenado y descargable.</div></div>
+      <div class="grid doc-grid" id="doc-grid"></div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Cada cliente tiene una carpeta espejo en Drive; el portal muestra solo los documentos de su RFC.</div>
+    </section>
+
+    <!-- DATOS SAT -->
+    <section class="view" id="fiscal">
+      <div class="page-head"><div class="page-title">Datos ante el <em>SAT</em></div><div class="page-sub">Tu situación fiscal registrada y tus llaves de acceso.</div></div>
+      <div class="grid row-2b">
+        <div class="card">
+          <div class="card-h"><span class="card-t">Domicilio y datos fiscales</span><span class="pill">Constancia · 17 jul 2026</span></div>
+          <div class="card-b">
+            <div class="info-list">
+              <div class="info-cell"><div class="info-k">Razón social</div><div class="info-v">Empresa Demo, S.A. de C.V.</div></div>
+              <div class="info-cell"><div class="info-k">RFC</div><div class="info-v tnum">DEM250101QX8</div></div>
+              <div class="info-cell"><div class="info-k">Régimen</div><div class="info-v">General de Ley P. Morales (601)</div></div>
+              <div class="info-cell"><div class="info-k">Estatus padrón</div><div class="info-v"><span class="badge b-ok">Activo</span></div></div>
+              <div class="info-cell full"><div class="info-k">Domicilio fiscal</div><div class="info-v">Av. Insurgentes Sur 1602, Int. 4, Col. Crédito Constructor, Benito Juárez, CDMX, C.P. 03940</div></div>
+              <div class="info-cell"><div class="info-k">Última actualización SAT</div><div class="info-v">12 feb 2026</div></div>
+              <div class="info-cell"><div class="info-k">Correo registrado</div><div class="info-v">admin@mugi.mx</div></div>
+            </div>
+            <div style="margin-top:15px"><button class="dl-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar Constancia de Situación Fiscal (PDF)</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="card-t">e.firma (FIEL) y sellos</span></div>
+          <div class="card-b">
+            <div class="status-item" style="border-bottom:1px solid var(--line-2)"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><div><div class="s-txt">e.firma (FIEL)</div><div class="s-sub">Vigente hasta 14 mar 2028</div></div><button class="dl-link" style="margin-left:auto">Descargar .zip</button></div>
+            <div class="status-item" style="border-bottom:1px solid var(--line-2)"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><div><div class="s-txt">Certificado de Sello Digital</div><div class="s-sub">Vigente hasta 09 ene 2028</div></div><button class="dl-link" style="margin-left:auto">Descargar</button></div>
+            <div class="status-item"><span class="s-ic s-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 8v4M12 16h.01"/></svg></span><div><div class="s-txt">Contraseña del SAT (CIEC)</div><div class="s-sub">Resguardada · solicitar a tu contador</div></div><span class="s-state st-warn" style="margin-left:auto">Protegida</span></div>
+            <div class="note" style="margin-top:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> Las llaves se entregan por canal cifrado y con registro de descarga.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="view" id="historial">
+      <div class="page-head"><div class="page-title"><em>Historial</em></div><div class="page-sub">Bitácora de documentos, declaraciones y pagos.</div></div>
+      <div class="card"><div class="card-b">
+        <div class="tl" id="timeline"></div>
+      </div></div>
+    </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function go(view){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+  window.scrollTo(0,0);
+  document.getElementById('side').classList.remove('open');
+}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(b)go(b.dataset.view);});
+
+const chartData=[{m:'Ene',inc:402,egr:301},{m:'Feb',inc:438,egr:288},{m:'Mar',inc:471,egr:334},{m:'Abr',inc:455,egr:312},{m:'May',inc:432,egr:300},{m:'Jun',inc:486,egr:313}];
+const max=Math.max(...chartData.flatMap(d=>[d.inc,d.egr]));
+document.getElementById('chart').innerHTML=chartData.map(d=>`<div class="bargroup"><div class="bars"><div class="bar inc" style="height:0" data-h="${d.inc/max*100}"></div><div class="bar egr" style="height:0" data-h="${d.egr/max*100}"></div></div><div class="bar-x">${d.m}</div></div>`).join('');
+setTimeout(()=>document.querySelectorAll('.bar').forEach(b=>b.style.height=b.dataset.h+'%'),120);
+
+const mov=[
+  ['30 jun','Venta de mercancía · Factura F-1043','Ingreso','Distribuidora Kai SA','+$84,200','CFDI'],
+  ['28 jun','Pago a proveedor · MP electrónica','Egreso','Insumos del Bajío SA','-$32,540','Banco'],
+  ['26 jun','Venta de mercancía · Factura F-1041','Ingreso','Grupo Hannah SC','+$56,800','CFDI'],
+  ['24 jun','Renta de oficina','Egreso','Inmuebles Liam SA','-$28,000','CFDI'],
+  ['21 jun','Pago de nómina 2a quincena','Egreso','Nómina','-$61,300','Banco'],
+  ['18 jun','Venta de mercancía · Factura F-1038','Ingreso','Comercial JP SA','+$92,100','CFDI'],
+  ['15 jun','Servicios de telecomunicaciones','Egreso','Teléfonos de México','-$1,240','CFDI']
+];
+document.getElementById('mov-body').innerHTML=mov.map(r=>`<tr><td class="tnum">${r[0]}</td><td class="t-strong">${r[1]}</td><td><span class="badge ${r[2]==='Ingreso'?'b-ok':'b-red'}">${r[2]}</span></td><td>${r[3]}</td><td style="text-align:right" class="money" ${r[4][0]==='+'?'style=color:var(--green-d)':'style=color:var(--neg)'}>${r[4]}</td><td><span class="badge ${r[5]==='CFDI'?'b-green':'b-gray'}">${r[5]}</span></td></tr>`).join('');
+
+const dlIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>';
+const facEmit=[['30 jun 2026','F-1043','Distribuidora Kai SA','$97,672','Vigente'],['26 jun 2026','F-1041','Grupo Hannah SC','$65,888','Vigente'],['18 jun 2026','F-1038','Comercial JP SA','$106,836','Vigente'],['09 jun 2026','F-1035','Servicios Fonseca SA','$42,340','Vigente'],['03 jun 2026','F-1031','Distribuidora Kai SA','$38,280','Cancelada']];
+const facReci=[['28 jun 2026','A-8841','Insumos del Bajío SA','$32,540','Vigente'],['24 jun 2026','R-2210','Inmuebles Liam SA','$32,480','Vigente'],['15 jun 2026','150124','Teléfonos de México','$1,240','Vigente'],['11 jun 2026','B-0092','HDI Seguros','$1,800','Vigente'],['05 jun 2026','C-5567','Aldan Electrónica','$299','Vigente']];
+function renderFac(rows){document.getElementById('fac-body').innerHTML=rows.map(r=>`<tr><td class="tnum">${r[0]}</td><td class="t-strong tnum">${r[1]}</td><td>${r[2]}</td><td style="text-align:right" class="money">${r[3]}</td><td><span class="badge ${r[4]==='Vigente'?'b-ok':'b-red'}">${r[4]}</span></td><td style="text-align:right"><button class="dl-link" style="justify-content:flex-end">${dlIco}XML</button> &nbsp; <button class="dl-link" style="justify-content:flex-end">${dlIco}PDF</button></td></tr>`).join('');}
+renderFac(facEmit);
+document.querySelectorAll('.tab[data-fac]').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab[data-fac]').forEach(x=>x.classList.remove('active'));t.classList.add('active');renderFac(t.dataset.fac==='emitidas'?facEmit:facReci);}));
+
+const imp=[['Enero','$11,200','$2,980','17 feb','15 feb','15 feb','ok','Pagada'],['Febrero','$13,450','$3,120','17 mar','14 mar','14 mar','ok','Pagada'],['Marzo','$12,900','$3,540','17 abr','16 abr','16 abr','ok','Pagada'],['Abril','$14,100','$2,760','17 may','15 may','15 may','ok','Pagada'],['Mayo','$12,690','$2,740','17 jun','21 jun','21 jun','ok','Pagada'],['Junio','$14,900','$3,640','23 jul','—','—','warn','Por presentar']];
+document.getElementById('imp-body').innerHTML=imp.map(r=>`<tr><td class="t-strong">${r[0]} 2026</td><td style="text-align:right" class="money">${r[1]}</td><td style="text-align:right" class="money">${r[2]}</td><td class="tnum">${r[3]}</td><td class="tnum" ${r[4]==='—'?'style=color:var(--faint)':''}>${r[4]}</td><td class="tnum" ${r[5]==='—'?'style=color:var(--faint)':''}>${r[5]}</td><td><span class="badge ${r[6]==='ok'?'b-ok':'b-warn'}">${r[7]}</span></td><td>${r[6]==='ok'?`<button class="dl-link">${dlIco}Acuse</button>`:'<span style="color:var(--faint);font-size:12px">—</span>'}</td></tr>`).join('');
+
+const docs=[
+  ['Facturas (CFDI)','171 documentos · XML y PDF','<path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/>'],
+  ['Declaraciones','18 acuses · mensuales y anuales','<path d="M9 12l2 2 4-4"/><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/>'],
+  ['Comprobantes de pago','24 líneas de captura y recibos','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>'],
+  ['e.firma / FIEL y sellos','Llaves vigentes · canal cifrado','<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>'],
+  ['Estados de cuenta','Bancos · 2024–2026','<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>'],
+  ['Constancias y avisos','Situación fiscal · opinión 32-D','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/>']
+];
+document.getElementById('doc-grid').innerHTML=docs.map(d=>`<div class="card doc-card"><div class="doc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[2]}</svg></div><div class="doc-t">${d[0]}</div><div class="doc-d">${d[1]}</div><div class="doc-meta"><span>Abrir carpeta</span><span>${dlIco}</span></div></div>`).join('');
+
+const tl=[
+  ['br','Hoy · 06:00','Sincronización con ContaLink','Se cargaron 4 CFDI nuevos y 6 movimientos bancarios.'],
+  ['','21 jun 2026','Declaración de mayo presentada','ISR $12,690 + IVA $2,740 · pagada el mismo día. Acuse disponible.'],
+  ['','21 jun 2026','Comprobante de pago cargado','Línea de captura ISR/IVA mayo 2026.'],
+  ['warn','12 feb 2026','Constancia de Situación Fiscal actualizada','Nuevo domicilio fiscal registrado ante el SAT.'],
+  ['','28 mar 2026','Declaración anual 2025 presentada','ISR del ejercicio $142,300 · acuse disponible.']
+];
+document.getElementById('timeline').innerHTML=tl.map(t=>`<div class="tl-item"><span class="tl-dot ${t[0]}"></span><div class="tl-date">${t[1]}</div><div class="tl-t">${t[2]}</div><div class="tl-d">${t[3]}</div></div>`).join('');
+</script>
+
+<script>
+function gateLogin(e){
+  e.preventDefault();
+  var m=document.getElementById('gate_msg');
+  m.innerHTML='Los accesos de cliente se activan conforme conectamos cada empresa. Escríbenos a <b>fonseca@financialcr.com</b> y te damos de alta. Mientras tanto puedes ver el prototipo.';
+  m.style.display='block';
+  return false;
+}
+function verPrototipo(){
+  var g=document.getElementById('gate');
+  g.style.transition='opacity .25s';
+  g.style.opacity='0';
+  setTimeout(function(){ g.remove(); document.body.style.overflow=''; }, 250);
+}
+document.body.style.overflow='hidden';
+</script>
+</body>
+</html>
