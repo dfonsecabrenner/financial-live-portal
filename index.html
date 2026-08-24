@@ -6,20 +6,20 @@
 <title>Financial LIVE — Portal de Clientes · FCR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Inter:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --green:#698A34; --green-d:#49652E; --green-br:#8CAD4E; --green-2:#AEC87D; --green-3:#D4E1B1;
     --green-wash:#EEF3E2;
-    --ink:#333133; --ink-2:#3F3F41; --charcoal:#2E2D2F;
+    --ink:#4A4C4C; --ink-2:#5A5C5C; --charcoal:#3A3C3C;
     --bg:#F4F5F1; --surface:#FFFFFF; --line:#E6E8E0; --line-2:#EFF1EA;
-    --text:#33353A; --muted:#71757A; --faint:#A2A6A0;
+    --text:#4A4C4C; --muted:#71757A; --faint:#A2A6A0;
     --warn:#C8912E; --warn-wash:#F7EDD6;
     --neg:#C15B4A; --neg-wash:#F8E9E5;
     --radius:13px;
     --shadow:0 1px 2px rgba(51,49,51,.04),0 6px 22px rgba(51,49,51,.06);
-    --font:'Inter',system-ui,sans-serif; --display:'Barlow',system-ui,sans-serif;
-    --cond:'Barlow Semi Condensed',system-ui,sans-serif;
+    --font:'Hind',Arial,system-ui,sans-serif; --display:'Hind',Arial,sans-serif;
+    --cond:'Oswald',Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -32,6 +32,7 @@
   .side{background:var(--charcoal);color:#C7C7C5;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
   .brand{padding:20px 20px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
   .logo-svg{width:38px;height:30px;flex:0 0 auto}
+  .logo-img{width:168px;height:auto;display:block}
   .brand-txt{line-height:1}
   .brand-name{font-family:var(--cond);font-weight:700;color:#fff;font-size:19px;letter-spacing:.5px}
   .brand-sub{font-size:8.5px;color:var(--green-2);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px;font-weight:600}
@@ -204,18 +205,18 @@
 
 <style>
   #gate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;
-    background:linear-gradient(155deg,#49652E 0%,#3C5526 55%,#2E2D2F 100%);font-family:'Inter',system-ui,sans-serif}
-  #gate .card{background:#fff;border-radius:18px;width:100%;max-width:392px;padding:34px 30px 28px;
+    background:linear-gradient(155deg,#698A34 0%,#49652E 60%,#3A3C3C 100%);font-family:'Hind',Arial,sans-serif}
+  #gate .card{background:#fff;border-radius:18px;width:100%;max-width:392px;padding:32px 30px 28px;
     box-shadow:0 24px 60px rgba(0,0,0,.28)}
-  #gate .brand{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+  #gate .brand{display:flex;align-items:center;gap:11px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #EFF1EA}
   #gate .mark{width:36px;height:36px;border-radius:9px;background:#698A34;position:relative;flex:none}
   #gate .mark i{position:absolute;bottom:9px;width:4px;border-radius:1.5px;background:#fff;display:block}
   #gate .mark i:nth-child(1){left:9px;height:8px}
   #gate .mark i:nth-child(2){left:15px;height:13px;opacity:.85}
   #gate .mark i:nth-child(3){left:21px;height:18px;opacity:.7}
-  #gate .brand b{font-family:'Barlow',sans-serif;font-size:.98rem;line-height:1.15;display:block;color:#333133}
+  #gate .brand b{font-family:'Hind',Arial,sans-serif;font-size:.98rem;line-height:1.15;display:block;color:#333133}
   #gate .brand span{font-size:.7rem;color:#71757A;display:block;letter-spacing:.03em}
-  #gate h1{font-family:'Barlow',sans-serif;font-size:1.42rem;color:#333133;margin-bottom:5px}
+  #gate h1{font-family:'Hind',Arial,sans-serif;font-size:1.42rem;color:#333133;margin-bottom:5px}
   #gate p.sub{font-size:.88rem;color:#71757A;margin-bottom:22px;line-height:1.5}
   #gate label{display:block;font-size:.76rem;font-weight:600;color:#71757A;margin-bottom:6px}
   #gate .f{margin-bottom:13px}
@@ -242,11 +243,7 @@
 <div id="gate">
   <div class="card">
     <div class="brand">
-      <span class="mark"><i></i><i></i><i></i></span>
-      <span>
-        <b>Financial LIVE</b>
-        <span>Portal de clientes · FCR</span>
-      </span>
+      <img src="logo.png" alt="Financial Controlling &amp; Reporting" style="width:186px;height:auto;display:block">
     </div>
     <h1>Entra a tu información</h1>
     <p class="sub">Consulta tus ingresos, facturas, impuestos y expediente fiscal cuando lo necesites.</p>
@@ -268,17 +265,7 @@
 <div class="app">
   <aside class="side" id="side">
     <div class="brand">
-      <svg class="logo-svg" viewBox="0 0 42 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="14" width="6" height="10" rx="1" fill="#8CAD4E"/>
-        <rect x="16" y="8" width="6" height="16" rx="1" fill="#698A34"/>
-        <rect x="24" y="4" width="6" height="20" rx="1" fill="#8CAD4E"/>
-        <path d="M5 27 L34 27" stroke="#698A34" stroke-width="2" stroke-linecap="round"/>
-        <path d="M5 27 L9 23" stroke="#698A34" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <div class="brand-txt">
-        <div class="brand-name">FINANCIAL</div>
-        <div class="brand-sub">Controlling &amp; Reporting</div>
-      </div>
+      <img src="logo-blanco.png" alt="Financial Controlling &amp; Reporting" class="logo-img">
     </div>
     <nav class="nav" id="nav">
       <div class="nav-label">Principal</div>
