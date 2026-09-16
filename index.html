@@ -43,6 +43,7 @@
   .nav-item:hover{background:rgba(255,255,255,.05);color:#fff}
   .nav-item.active{background:rgba(140,173,78,.18);color:#fff;box-shadow:inset 2px 0 0 var(--green-br)}
   .nav-item.active svg{opacity:1;color:var(--green-br)}
+  .nav-badge[hidden]{display:none}
   .nav-badge{margin-left:auto;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px}
   .side-foot{padding:15px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#9A9A98}
   .side-foot b{color:var(--green-2);font-weight:600}
@@ -188,6 +189,15 @@
   .note{font-size:11.5px;color:var(--faint);margin-top:14px;display:flex;align-items:center;gap:7px}
   .note svg{width:14px;height:14px;flex:0 0 auto}
 
+  .banner-demo{position:sticky;top:0;z-index:19;display:flex;align-items:center;gap:10px;
+    background:#F7EDD6;color:#7A5A10;border-bottom:1px solid #E8D3A0;padding:10px 30px;font-size:12.5px}
+  .banner-demo[hidden]{display:none}
+  .banner-demo svg{width:16px;height:16px;flex:0 0 auto}
+  .banner-demo b{color:#5E4408}
+  .banner-demo button{margin-left:auto;flex:0 0 auto;font:inherit;font-size:11.5px;font-weight:600;
+    padding:5px 12px;border-radius:20px;border:1px solid #D8BE82;background:#fff;color:#7A5A10;cursor:pointer}
+  .banner-demo button:hover{background:#FBF5E7}
+  @media(max-width:760px){.banner-demo{padding:9px 16px;font-size:11.5px}}
   .banner-proto{background:var(--warn-wash);color:#8A5E12;border:1px solid #EBD9AE;border-radius:9px;padding:10px 15px;font-size:12px;margin-bottom:18px;display:flex;align-items:center;gap:9px}
   .banner-proto svg{width:15px;height:15px;flex:0 0 auto}
 
@@ -244,6 +254,26 @@
     font-size:.84rem;line-height:1.45}
   #gate .foot{margin-top:20px;font-size:.74rem;color:#A2A6A0;text-align:center;line-height:1.5}
   #gate .foot a{color:#698A34;text-decoration:none;font-weight:600}
+  #gate .msg.ok{background:#EEF3E2;color:#49652E}
+  #gate .msg.err{background:#F8E9E5;color:#A8412C}
+  .deadline[hidden],.sync[hidden]{display:none!important}
+  .cl-sel{font:inherit;font-size:12.5px;padding:7px 11px;border-radius:9px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink);max-width:230px;cursor:pointer}
+  .cl-sel:focus{outline:2px solid var(--green-br);border-color:transparent}
+  .sync.stale{background:var(--warn-wash);color:#8A6410;border-color:#E8D3A0}
+  .sync.stale .dot{background:var(--warn);box-shadow:0 0 0 3px rgba(200,145,46,.18)}
+  button.avatar{border:1px solid var(--green-3);cursor:pointer;font:inherit;font-weight:600;font-size:13px}
+  button.avatar:hover{background:var(--green-3)}
+  .empty{padding:26px 18px;text-align:center;color:var(--faint);font-size:13px}
+  .alert-c{display:flex;gap:12px;align-items:flex-start;background:var(--warn-wash);border:1px solid #E8D3A0;
+    color:#7A5A10;border-radius:var(--radius);padding:13px 15px;margin-bottom:16px;font-size:13px;line-height:1.5}
+  .alert-c svg{width:17px;height:17px;flex:0 0 auto;margin-top:1px}
+  .alert-c b{color:#5E4408}
+  .conc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;
+    border-bottom:1px solid var(--line-2);font-size:13px}
+  .conc-row:last-child{border-bottom:none}
+  .conc-k{color:var(--muted)}
+  .conc-v{font-weight:600;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -254,15 +284,14 @@
       <img src="logo.png" alt="Financial Controlling &amp; Reporting" style="width:186px;height:auto;display:block">
     </div>
     <h1>Entra a tu información</h1>
-    <p class="sub">Consulta tus ingresos, facturas, impuestos y expediente fiscal cuando lo necesites.</p>
+    <p class="sub">Te mandamos una liga de acceso a tu correo. Sin contraseñas que recordar.</p>
     <form onsubmit="return gateLogin(event)">
-      <div class="f"><label>Correo</label><input type="email" id="gate_user" placeholder="nombre@empresa.com" required></div>
-      <div class="f"><label>Contraseña</label><input type="password" id="gate_pass" placeholder="••••••••" required></div>
-      <button class="btn" type="submit">Entrar</button>
+      <div class="f"><label>Correo</label><input type="email" id="gate_user" placeholder="nombre@empresa.com" required autocomplete="email"></div>
+      <button class="btn" type="submit" id="gate_btn">Enviarme la liga de acceso</button>
     </form>
     <div id="gate_msg" class="msg"></div>
     <div class="divider">o</div>
-    <button class="btn ghost" onclick="verPrototipo()">Ver prototipo</button>
+    <button class="btn ghost" onclick="verPrototipo()">Ver una demostración</button>
     <div class="foot">
       ¿Aún no tienes acceso?<br>
       Escríbenos a <a href="mailto:fonseca@financialcr.com">fonseca@financialcr.com</a>
@@ -280,7 +309,7 @@
       <button class="nav-item active" data-view="resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Resumen</button>
       <button class="nav-item" data-view="flujo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>Ingresos y Egresos</button>
       <button class="nav-item" data-view="facturas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>Facturas</button>
-      <button class="nav-item" data-view="impuestos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Impuestos y Declaraciones<span class="nav-badge">1</span></button>
+      <button class="nav-item" data-view="impuestos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Impuestos y Declaraciones<span class="nav-badge" id="nav-badge" hidden>0</span></button>
       <div class="nav-label">Documentos</div>
       <button class="nav-item" data-view="documentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 3h8a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Expediente Fiscal</button>
       <button class="nav-item" data-view="fiscal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01M12 9h.01M15 9h.01M9 13h.01M12 13h.01M15 13h.01"/></svg>Datos ante el SAT</button>
@@ -295,36 +324,39 @@
     <header class="top">
       <button class="hamb" onclick="document.getElementById('side').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <div class="client">
-        <div class="client-logo">ED</div>
+        <div class="client-logo" id="cl-ini">··</div>
         <div>
-          <div class="client-name">Empresa Demo, S.A. de C.V.</div>
-          <div class="client-meta">RFC: DEM250101QX8 · Régimen General de Ley (601)</div>
+          <div class="client-name" id="cl-nom">Cargando…</div>
+          <div class="client-meta" id="cl-meta">&nbsp;</div>
         </div>
       </div>
       <div class="top-right">
-        <div class="sync"><span class="dot"></span> ContaLink · actualizado hoy 06:00</div>
-        <div class="avatar">DM</div>
+        <select id="cl-sel" class="cl-sel" hidden></select>
+        <div class="sync" id="sync"><span class="dot"></span> <span id="sync-txt">Conectando…</span></div>
+        <button class="avatar" id="btn-salir" title="Cerrar sesión">··</button>
       </div>
     </header>
 
+    <div class="banner-demo" id="banner-demo" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
+      <span><b>Estás viendo una demostración.</b> Los datos de esta pantalla son de una empresa ficticia, no corresponden a ningún cliente real.</span>
+      <button onclick="location.reload()">Salir de la demo</button>
+    </div>
     <div class="content">
 
     <!-- RESUMEN -->
     <section class="view active" id="resumen">
-      <div class="banner-proto">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
-        Prototipo de demostración · datos de ejemplo. La información real se alimentaría desde ContaLink (API) y el expediente en Drive.
-      </div>
       <div class="page-head">
-        <div class="page-title">Hola, <em>Demo</em></div>
-        <div class="page-sub">Estado de Empresa Demo al 18 de julio de 2026.</div>
+        <div class="page-title">Hola, <em id="hola">…</em></div>
+        <div class="page-sub" id="resumen-sub">&nbsp;</div>
       </div>
+      <div id="alerta-cuadre"></div>
 
-      <div class="deadline">
-        <div class="dl-count">6<small>días</small></div>
+      <div class="deadline" id="dl-box" hidden>
+        <div class="dl-count" id="dl-num">–<small>días</small></div>
         <div class="dl-mid">
-          <h4>Próximo vencimiento: Declaración mensual (ISR e IVA) — Junio 2026</h4>
-          <p>Fecha límite de presentación y pago: <b style="color:var(--green-br)">23 de julio de 2026</b> · Importe estimado: $18,540 MXN</p>
+          <h4 id="dl-tit">&nbsp;</h4>
+          <p id="dl-sub">&nbsp;</p>
         </div>
         <button class="dl-btn" onclick="go('impuestos')">Ver detalle</button>
       </div>
@@ -332,23 +364,23 @@
       <div class="grid kpis">
         <div class="card kpi">
           <div class="kpi-top"><span class="kpi-label">Ingresos del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
-          <div class="kpi-val tnum">$486,200</div>
-          <div class="kpi-delta up">▲ 12.4% vs. mayo</div>
+          <div class="kpi-val tnum" id="k-ing">—</div>
+          <div class="kpi-delta up" id="k-ing-d">&nbsp;</div>
         </div>
         <div class="card kpi">
           <div class="kpi-top"><span class="kpi-label">Egresos del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span></div>
-          <div class="kpi-val tnum">$312,850</div>
-          <div class="kpi-delta down">▲ 4.1% vs. mayo</div>
+          <div class="kpi-val tnum" id="k-egr">—</div>
+          <div class="kpi-delta down" id="k-egr-d">&nbsp;</div>
         </div>
         <div class="card kpi">
           <div class="kpi-top"><span class="kpi-label">Resultado del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-6"/></svg></span></div>
-          <div class="kpi-val tnum">$173,350</div>
-          <div class="kpi-delta up">▲ 28.9% margen</div>
+          <div class="kpi-val tnum" id="k-res">—</div>
+          <div class="kpi-delta up" id="k-res-d">&nbsp;</div>
         </div>
         <div class="card kpi">
           <div class="kpi-top"><span class="kpi-label">Impuestos estimados</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span></div>
-          <div class="kpi-val tnum">$18,540</div>
-          <div class="kpi-delta" style="color:var(--warn)">vence en 6 días</div>
+          <div class="kpi-val tnum" id="k-imp">—</div>
+          <div class="kpi-delta" id="k-imp-d">&nbsp;</div>
         </div>
       </div>
 
@@ -363,15 +395,7 @@
         <div class="card">
           <div class="card-h"><span class="card-t">Cumplimiento</span></div>
           <div class="card-b">
-            <div class="status-list">
-              <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Contabilidad al día</div><div class="s-sub">Última carga: 17 jul</div></div><span class="s-state st-ok">OK</span></div>
-              <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Declaración de mayo</div><div class="s-sub">Presentada 21 jun</div></div><span class="s-state st-ok">OK</span></div>
-              <div class="status-item"><span class="s-ic s-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 8v4M12 16h.01"/></svg></span><div><div class="s-txt">Declaración de junio</div><div class="s-sub">Por presentar · vence 23 jul</div></div><span class="s-state st-warn">Pendiente</span></div>
-              <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Opinión de cumplimiento</div><div class="s-sub">Positiva · SAT 32-D</div></div><span class="s-state st-ok">Positiva</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
+            <div class="status-list" id="cumpl"></div></div></div></div>
 
       <div class="assist" style="margin-top:16px">
         <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 2 1 3.5 2.5 5S9 21 12 21s4-1.5 4.5-3 2.5-2 2.5-6a7 7 0 00-7-7z"/></svg> ¿Qué necesitas hoy?</h3>
@@ -391,30 +415,30 @@
     <section class="view" id="flujo">
       <div class="page-head"><div class="page-title">Ingresos y <em>Egresos</em></div><div class="page-sub">Flujo casi en tiempo real, sincronizado a diario desde ContaLink.</div></div>
       <div class="grid kpis" style="grid-template-columns:repeat(3,1fr)">
-        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Ingresos 2026</span></div><div class="kpi-val tnum">$2,914,600</div><div class="kpi-delta up">▲ 9.7% vs. 2025</div></div>
-        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Egresos 2026</span></div><div class="kpi-val tnum">$1,987,200</div><div class="kpi-delta down">▲ 6.2% vs. 2025</div></div>
-        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Utilidad acumulada</span></div><div class="kpi-val tnum">$927,400</div><div class="kpi-delta up">▲ 31.8% margen</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label" id="f-ing-l">Ingresos del ejercicio</span></div><div class="kpi-val tnum" id="f-ing">—</div><div class="kpi-delta" id="f-ing-d">&nbsp;</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label" id="f-egr-l">Egresos del ejercicio</span></div><div class="kpi-val tnum" id="f-egr">—</div><div class="kpi-delta" id="f-egr-d">&nbsp;</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Resultado acumulado</span></div><div class="kpi-val tnum" id="f-res">—</div><div class="kpi-delta" id="f-res-d">&nbsp;</div></div>
       </div>
       <div class="card">
-        <div class="card-h"><span class="card-t">Movimientos recientes</span><span class="pill">Junio 2026</span></div>
+        <div class="card-h"><span class="card-t">Movimientos bancarios recientes</span><span class="pill" id="mov-pill">—</span></div>
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Contraparte</th><th style="text-align:right">Monto</th><th>Origen</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Cuenta contable</th><th style="text-align:right">Monto</th><th>CFDI</th></tr></thead>
           <tbody id="mov-body"></tbody>
         </table></div>
       </div>
-      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Los movimientos combinan CFDI emitidos/recibidos y movimientos bancarios conciliados en ContaLink.</div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Movimientos del auxiliar de bancos en ContaLink. La marca CFDI indica los que ya quedaron ligados a su factura.</div>
     </section>
 
     <!-- FACTURAS -->
     <section class="view" id="facturas">
       <div class="page-head"><div class="page-title"><em>Facturas</em></div><div class="page-sub">Todas tus facturas emitidas y recibidas, con descarga de XML y PDF.</div></div>
       <div class="tabs">
-        <button class="tab active" data-fac="emitidas">Emitidas (43)</button>
-        <button class="tab" data-fac="recibidas">Recibidas (128)</button>
+        <button class="tab active" data-fac="emitidas">Emitidas (<span id="n-emi">—</span>)</button>
+        <button class="tab" data-fac="recibidas">Recibidas (<span id="n-rec">—</span>)</button>
       </div>
       <div class="card">
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Fecha</th><th>Folio / UUID</th><th>Cliente / Proveedor</th><th style="text-align:right">Total</th><th>Estatus</th><th style="text-align:right">Descargar</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Folio</th><th>Cliente / Proveedor</th><th style="text-align:right">Total</th><th>Método</th><th style="text-align:right">Cobro / Pago</th></tr></thead>
           <tbody id="fac-body"></tbody>
         </table></div>
       </div>
@@ -424,36 +448,32 @@
     <section class="view" id="impuestos">
       <div class="page-head"><div class="page-title">Impuestos y <em>Declaraciones</em></div><div class="page-sub">Qué se presentó, cuándo, cuánto se pagó y qué viene.</div></div>
 
-      <div class="deadline" style="margin-bottom:20px">
-        <div class="dl-count">6<small>días</small></div>
-        <div class="dl-mid"><h4>Declaración mensual Junio 2026 — por presentar</h4><p>Vence el <b style="color:var(--green-br)">23 jul 2026</b> · ISR estimado $14,900 · IVA estimado $3,640</p></div>
-        <button class="dl-btn">Descargar cálculo</button>
+      <div class="deadline" style="margin-bottom:20px" id="dl2-box" hidden>
+        <div class="dl-count" id="dl2-num">–<small>días</small></div>
+        <div class="dl-mid"><h4 id="dl2-tit">&nbsp;</h4><p id="dl2-sub">&nbsp;</p></div>
       </div>
 
       <div class="card" style="margin-bottom:16px">
-        <div class="card-h"><span class="card-t">Declaraciones mensuales 2026</span><span class="pill">RESICO / General</span></div>
+        <div class="card-h"><span class="card-t">Cálculo mensual del ejercicio</span><span class="pill" id="imp-base">—</span></div>
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Periodo</th><th style="text-align:right">ISR</th><th style="text-align:right">IVA</th><th>Fecha límite</th><th>Presentada</th><th>Pagada</th><th>Estatus</th><th>Acuse</th></tr></thead>
+          <thead><tr><th>Periodo</th><th style="text-align:right">ISR</th><th style="text-align:right">IVA causado</th><th style="text-align:right">IVA acreditable</th><th style="text-align:right">Retenciones</th><th style="text-align:right">Total</th><th>Estatus</th></tr></thead>
           <tbody id="imp-body"></tbody>
         </table></div>
       </div>
 
       <div class="grid row-2b">
         <div class="card">
-          <div class="card-h"><span class="card-t">Declaración anual</span></div>
-          <div class="card-b">
-            <div class="status-item" style="border-bottom:1px solid var(--line-2)"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Ejercicio 2025</div><div class="s-sub">Presentada 28 mar 2026 · ISR $142,300</div></div><button class="dl-link" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Acuse</button></div>
-            <div class="status-item"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="s-txt">Ejercicio 2024</div><div class="s-sub">Presentada 31 mar 2025 · ISR $118,900</div></div><button class="dl-link" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Acuse</button></div>
-          </div>
+          <div class="card-h"><span class="card-t">Control: contabilidad vs. documentos</span></div>
+          <div class="card-b"><div id="conc-list"></div></div>
         </div>
         <div class="card">
-          <div class="card-h"><span class="card-t">Total pagado 2026</span></div>
+          <div class="card-h"><span class="card-t">Acumulado del ejercicio</span></div>
           <div class="card-b">
-            <div style="display:flex;align-items:baseline;gap:8px"><span class="kpi-val tnum" style="font-size:32px">$96,120</span><span style="color:var(--muted);font-size:13px">MXN</span></div>
+            <div style="display:flex;align-items:baseline;gap:8px"><span class="kpi-val tnum" style="font-size:32px" id="t-tot">—</span><span style="color:var(--muted);font-size:13px">MXN</span></div>
             <div style="margin-top:15px;display:flex;flex-direction:column;gap:10px">
-              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">ISR provisional</span><b class="tnum">$78,340</b></div>
-              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">IVA a cargo</span><b class="tnum">$17,780</b></div>
-              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Retenciones</span><b class="tnum">$0</b></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">ISR</span><b class="tnum" id="t-isr">—</b></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">IVA causado</span><b class="tnum" id="t-iva">—</b></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Retenciones</span><b class="tnum" id="t-ret">—</b></div>
             </div>
           </div>
         </div>
@@ -462,9 +482,9 @@
 
     <!-- DOCUMENTOS -->
     <section class="view" id="documentos">
-      <div class="page-head"><div class="page-title">Expediente <em>Fiscal</em></div><div class="page-sub">Tu Drive contable-fiscal: todo tu papeleo, ordenado y descargable.</div></div>
+      <div class="page-head"><div class="page-title">Expediente <em>Fiscal</em></div><div class="page-sub">Tu papeleo contable-fiscal, ordenado y descargable.</div></div>
       <div class="grid doc-grid" id="doc-grid"></div>
-      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Cada cliente tiene una carpeta espejo en Drive; el portal muestra solo los documentos de su RFC.</div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> <span id="doc-nota">El expediente en Drive todavía no está conectado al portal. Los conteos de abajo salen de lo que ya vive en Supabase.</span></div>
     </section>
 
     <!-- DATOS SAT -->
@@ -472,26 +492,23 @@
       <div class="page-head"><div class="page-title">Datos ante el <em>SAT</em></div><div class="page-sub">Tu situación fiscal registrada y tus llaves de acceso.</div></div>
       <div class="grid row-2b">
         <div class="card">
-          <div class="card-h"><span class="card-t">Domicilio y datos fiscales</span><span class="pill">Constancia · 17 jul 2026</span></div>
+          <div class="card-h"><span class="card-t">Datos fiscales</span><span class="pill" id="sat-pill">—</span></div>
           <div class="card-b">
             <div class="info-list">
-              <div class="info-cell"><div class="info-k">Razón social</div><div class="info-v">Empresa Demo, S.A. de C.V.</div></div>
-              <div class="info-cell"><div class="info-k">RFC</div><div class="info-v tnum">DEM250101QX8</div></div>
-              <div class="info-cell"><div class="info-k">Régimen</div><div class="info-v">General de Ley P. Morales (601)</div></div>
-              <div class="info-cell"><div class="info-k">Estatus padrón</div><div class="info-v"><span class="badge b-ok">Activo</span></div></div>
-              <div class="info-cell full"><div class="info-k">Domicilio fiscal</div><div class="info-v">Av. Insurgentes Sur 1602, Int. 4, Col. Crédito Constructor, Benito Juárez, CDMX, C.P. 03940</div></div>
-              <div class="info-cell"><div class="info-k">Última actualización SAT</div><div class="info-v">12 feb 2026</div></div>
-              <div class="info-cell"><div class="info-k">Correo registrado</div><div class="info-v">admin@mugi.mx</div></div>
+              <div class="info-cell"><div class="info-k">Razón social</div><div class="info-v" id="sat-nom">—</div></div>
+              <div class="info-cell"><div class="info-k">RFC</div><div class="info-v tnum" id="sat-rfc">—</div></div>
+              <div class="info-cell"><div class="info-k">Régimen</div><div class="info-v" id="sat-reg">—</div></div>
+              <div class="info-cell"><div class="info-k">Estatus</div><div class="info-v" id="sat-est">—</div></div>
+              <div class="info-cell"><div class="info-k">Correo de contacto</div><div class="info-v" id="sat-mail">—</div></div>
+              <div class="info-cell"><div class="info-k">Alta en el portal</div><div class="info-v" id="sat-alta">—</div></div>
             </div>
-            <div style="margin-top:15px"><button class="dl-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar Constancia de Situación Fiscal (PDF)</button></div>
+            <div class="note" style="margin-top:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> El domicilio fiscal y la Constancia se conectarán cuando enlacemos el expediente del SAT.</div>
           </div>
         </div>
         <div class="card">
           <div class="card-h"><span class="card-t">e.firma (FIEL) y sellos</span></div>
           <div class="card-b">
-            <div class="status-item" style="border-bottom:1px solid var(--line-2)"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><div><div class="s-txt">e.firma (FIEL)</div><div class="s-sub">Vigente hasta 14 mar 2028</div></div><button class="dl-link" style="margin-left:auto">Descargar .zip</button></div>
-            <div class="status-item" style="border-bottom:1px solid var(--line-2)"><span class="s-ic s-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><div><div class="s-txt">Certificado de Sello Digital</div><div class="s-sub">Vigente hasta 09 ene 2028</div></div><button class="dl-link" style="margin-left:auto">Descargar</button></div>
-            <div class="status-item"><span class="s-ic s-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 8v4M12 16h.01"/></svg></span><div><div class="s-txt">Contraseña del SAT (CIEC)</div><div class="s-sub">Resguardada · solicitar a tu contador</div></div><span class="s-state st-warn" style="margin-left:auto">Protegida</span></div>
+            <div class="status-item"><span class="s-ic s-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><div><div class="s-txt">Sin llaves registradas en el portal</div><div class="s-sub">La e.firma y los sellos se resguardan fuera del portal. Solicítalos a tu contador.</div></div><span class="s-state st-warn" style="margin-left:auto">Protegida</span></div>
             <div class="note" style="margin-top:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> Las llaves se entregan por canal cifrado y con registro de descarga.</div>
           </div>
         </div>
@@ -500,7 +517,7 @@
 
     <!-- HISTORIAL -->
     <section class="view" id="historial">
-      <div class="page-head"><div class="page-title"><em>Historial</em></div><div class="page-sub">Bitácora de documentos, declaraciones y pagos.</div></div>
+      <div class="page-head"><div class="page-title"><em>Historial</em></div><div class="page-sub">Cada sincronización con ContaLink, con su resultado y su cuadre.</div></div>
       <div class="card"><div class="card-b">
         <div class="tl" id="timeline"></div>
       </div></div>
@@ -510,76 +527,488 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
+const SB_URL = 'https://rvldlwkujmxwdgqhoafq.supabase.co';
+const SB_KEY = 'sb_publishable_2dPeXxxZ5LzTcPg1oq699Q_-IsnRHVK';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+/* ---------- utilidades ---------- */
+const $ = id => document.getElementById(id);
+const N = v => (v === null || v === undefined || v === '') ? null : Number(v);
+const MXN = (v, dec) => v === null || v === undefined || isNaN(v) ? '—' :
+  (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString('es-MX',
+    {minimumFractionDigits: dec === undefined ? 2 : dec, maximumFractionDigits: dec === undefined ? 2 : dec});
+const K = v => v === null || v === undefined || isNaN(v) ? '—' :
+  (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString('es-MX', {maximumFractionDigits: 0});
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fecha(d){ if(!d) return '—'; const p = String(d).slice(0,10).split('-');
+  return p[2].replace(/^0/,'') + ' ' + MES[+p[1]-1] + ' ' + p[0]; }
+function fechaCorta(d){ if(!d) return '—'; const p = String(d).slice(0,10).split('-');
+  return p[2] + ' ' + MES[+p[1]-1]; }
+function periodoLargo(d){ if(!d) return '—'; const p = String(d).slice(0,10).split('-');
+  const L=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return L[+p[1]-1] + ' ' + p[0]; }
+function esc(t){ const d = document.createElement('div'); d.textContent = t === null || t === undefined ? '' : String(t); return d.innerHTML; }
+function iniciales(n){ if(!n) return '··';
+  return n.trim().split(/\s+/).filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase() || n.slice(0,2).toUpperCase(); }
+function vacio(el, msg){ el.innerHTML = '<tr><td colspan="9" class="empty">' + esc(msg) + '</td></tr>'; }
+
+/* ---------- navegación ---------- */
 function go(view){
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===view));
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === view));
   window.scrollTo(0,0);
-  document.getElementById('side').classList.remove('open');
+  $('side').classList.remove('open');
 }
-document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(b)go(b.dataset.view);});
+$('nav').addEventListener('click', e => { const b = e.target.closest('.nav-item'); if(b) go(b.dataset.view); });
 
-const chartData=[{m:'Ene',inc:402,egr:301},{m:'Feb',inc:438,egr:288},{m:'Mar',inc:471,egr:334},{m:'Abr',inc:455,egr:312},{m:'May',inc:432,egr:300},{m:'Jun',inc:486,egr:313}];
-const max=Math.max(...chartData.flatMap(d=>[d.inc,d.egr]));
-document.getElementById('chart').innerHTML=chartData.map(d=>`<div class="bargroup"><div class="bars"><div class="bar inc" style="height:0" data-h="${d.inc/max*100}"></div><div class="bar egr" style="height:0" data-h="${d.egr/max*100}"></div></div><div class="bar-x">${d.m}</div></div>`).join('');
-setTimeout(()=>document.querySelectorAll('.bar').forEach(b=>b.style.height=b.dataset.h+'%'),120);
-
-const mov=[
-  ['30 jun','Venta de mercancía · Factura F-1043','Ingreso','Distribuidora Kai SA','+$84,200','CFDI'],
-  ['28 jun','Pago a proveedor · MP electrónica','Egreso','Insumos del Bajío SA','-$32,540','Banco'],
-  ['26 jun','Venta de mercancía · Factura F-1041','Ingreso','Grupo Hannah SC','+$56,800','CFDI'],
-  ['24 jun','Renta de oficina','Egreso','Inmuebles Liam SA','-$28,000','CFDI'],
-  ['21 jun','Pago de nómina 2a quincena','Egreso','Nómina','-$61,300','Banco'],
-  ['18 jun','Venta de mercancía · Factura F-1038','Ingreso','Comercial JP SA','+$92,100','CFDI'],
-  ['15 jun','Servicios de telecomunicaciones','Egreso','Teléfonos de México','-$1,240','CFDI']
-];
-document.getElementById('mov-body').innerHTML=mov.map(r=>`<tr><td class="tnum">${r[0]}</td><td class="t-strong">${r[1]}</td><td><span class="badge ${r[2]==='Ingreso'?'b-ok':'b-red'}">${r[2]}</span></td><td>${r[3]}</td><td style="text-align:right" class="money" ${r[4][0]==='+'?'style=color:var(--green-d)':'style=color:var(--neg)'}>${r[4]}</td><td><span class="badge ${r[5]==='CFDI'?'b-green':'b-gray'}">${r[5]}</span></td></tr>`).join('');
-
-const dlIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>';
-const facEmit=[['30 jun 2026','F-1043','Distribuidora Kai SA','$97,672','Vigente'],['26 jun 2026','F-1041','Grupo Hannah SC','$65,888','Vigente'],['18 jun 2026','F-1038','Comercial JP SA','$106,836','Vigente'],['09 jun 2026','F-1035','Servicios Fonseca SA','$42,340','Vigente'],['03 jun 2026','F-1031','Distribuidora Kai SA','$38,280','Cancelada']];
-const facReci=[['28 jun 2026','A-8841','Insumos del Bajío SA','$32,540','Vigente'],['24 jun 2026','R-2210','Inmuebles Liam SA','$32,480','Vigente'],['15 jun 2026','150124','Teléfonos de México','$1,240','Vigente'],['11 jun 2026','B-0092','HDI Seguros','$1,800','Vigente'],['05 jun 2026','C-5567','Aldan Electrónica','$299','Vigente']];
-function renderFac(rows){document.getElementById('fac-body').innerHTML=rows.map(r=>`<tr><td class="tnum">${r[0]}</td><td class="t-strong tnum">${r[1]}</td><td>${r[2]}</td><td style="text-align:right" class="money">${r[3]}</td><td><span class="badge ${r[4]==='Vigente'?'b-ok':'b-red'}">${r[4]}</span></td><td style="text-align:right"><button class="dl-link" style="justify-content:flex-end">${dlIco}XML</button> &nbsp; <button class="dl-link" style="justify-content:flex-end">${dlIco}PDF</button></td></tr>`).join('');}
-renderFac(facEmit);
-document.querySelectorAll('.tab[data-fac]').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab[data-fac]').forEach(x=>x.classList.remove('active'));t.classList.add('active');renderFac(t.dataset.fac==='emitidas'?facEmit:facReci);}));
-
-const imp=[['Enero','$11,200','$2,980','17 feb','15 feb','15 feb','ok','Pagada'],['Febrero','$13,450','$3,120','17 mar','14 mar','14 mar','ok','Pagada'],['Marzo','$12,900','$3,540','17 abr','16 abr','16 abr','ok','Pagada'],['Abril','$14,100','$2,760','17 may','15 may','15 may','ok','Pagada'],['Mayo','$12,690','$2,740','17 jun','21 jun','21 jun','ok','Pagada'],['Junio','$14,900','$3,640','23 jul','—','—','warn','Por presentar']];
-document.getElementById('imp-body').innerHTML=imp.map(r=>`<tr><td class="t-strong">${r[0]} 2026</td><td style="text-align:right" class="money">${r[1]}</td><td style="text-align:right" class="money">${r[2]}</td><td class="tnum">${r[3]}</td><td class="tnum" ${r[4]==='—'?'style=color:var(--faint)':''}>${r[4]}</td><td class="tnum" ${r[5]==='—'?'style=color:var(--faint)':''}>${r[5]}</td><td><span class="badge ${r[6]==='ok'?'b-ok':'b-warn'}">${r[7]}</span></td><td>${r[6]==='ok'?`<button class="dl-link">${dlIco}Acuse</button>`:'<span style="color:var(--faint);font-size:12px">—</span>'}</td></tr>`).join('');
-
-const docs=[
-  ['Facturas (CFDI)','171 documentos · XML y PDF','<path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/>'],
-  ['Declaraciones','18 acuses · mensuales y anuales','<path d="M9 12l2 2 4-4"/><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/>'],
-  ['Comprobantes de pago','24 líneas de captura y recibos','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>'],
-  ['e.firma / FIEL y sellos','Llaves vigentes · canal cifrado','<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>'],
-  ['Estados de cuenta','Bancos · 2024–2026','<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>'],
-  ['Constancias y avisos','Situación fiscal · opinión 32-D','<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/>']
-];
-document.getElementById('doc-grid').innerHTML=docs.map(d=>`<div class="card doc-card"><div class="doc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d[2]}</svg></div><div class="doc-t">${d[0]}</div><div class="doc-d">${d[1]}</div><div class="doc-meta"><span>Abrir carpeta</span><span>${dlIco}</span></div></div>`).join('');
-
-const tl=[
-  ['br','Hoy · 06:00','Sincronización con ContaLink','Se cargaron 4 CFDI nuevos y 6 movimientos bancarios.'],
-  ['','21 jun 2026','Declaración de mayo presentada','ISR $12,690 + IVA $2,740 · pagada el mismo día. Acuse disponible.'],
-  ['','21 jun 2026','Comprobante de pago cargado','Línea de captura ISR/IVA mayo 2026.'],
-  ['warn','12 feb 2026','Constancia de Situación Fiscal actualizada','Nuevo domicilio fiscal registrado ante el SAT.'],
-  ['','28 mar 2026','Declaración anual 2025 presentada','ISR del ejercicio $142,300 · acuse disponible.']
-];
-document.getElementById('timeline').innerHTML=tl.map(t=>`<div class="tl-item"><span class="tl-dot ${t[0]}"></span><div class="tl-date">${t[1]}</div><div class="tl-t">${t[2]}</div><div class="tl-d">${t[3]}</div></div>`).join('');
-</script>
-
-<script>
-function gateLogin(e){
+/* ---------- sesión ---------- */
+async function gateLogin(e){
   e.preventDefault();
-  var m=document.getElementById('gate_msg');
-  m.innerHTML='Los accesos de cliente se activan conforme conectamos cada empresa. Escríbenos a <b>fonseca@financialcr.com</b> y te damos de alta. Mientras tanto puedes ver el prototipo.';
-  m.style.display='block';
+  const email = $('gate_user').value.trim();
+  const m = $('gate_msg'), btn = $('gate_btn');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  const { error } = await sb.auth.signInWithOtp({
+    email, options: { emailRedirectTo: window.location.origin }
+  });
+  btn.disabled = false; btn.textContent = 'Enviarme la liga de acceso';
+  m.style.display = 'block';
+  if (error) { m.className = 'msg err'; m.textContent = 'No se pudo enviar: ' + error.message; }
+  else { m.className = 'msg ok';
+    m.innerHTML = 'Listo. Te mandamos una liga a <b>' + esc(email) + '</b>. Ábrela en este mismo navegador.'; }
   return false;
 }
-function verPrototipo(){
-  var g=document.getElementById('gate');
-  g.style.transition='opacity .25s';
-  g.style.opacity='0';
-  setTimeout(function(){ g.remove(); document.body.style.overflow=''; }, 250);
+window.gateLogin = gateLogin;
+
+function abrirApp(){ const g = $('gate'); if(g){ g.style.transition='opacity .25s'; g.style.opacity='0';
+  setTimeout(()=>{ g.remove(); document.body.style.overflow=''; }, 250); } }
+
+$('btn-salir').addEventListener('click', async () => {
+  if (!DEMO) await sb.auth.signOut();
+  location.reload();
+});
+
+/* ---------- estado ---------- */
+let CLIENTES = [], ACTUAL = null, DB = sb, DEMO = false;
+
+async function arranca(){
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { document.body.style.overflow = 'hidden'; return; }
+
+  const { data: cls, error } = await DB.from('v_portal_kpis')
+    .select('*').order('code');
+  if (error) { $('gate_msg').style.display='block'; $('gate_msg').className='msg err';
+    $('gate_msg').textContent = 'Sesión iniciada pero sin acceso a datos: ' + error.message; return; }
+  if (!cls || !cls.length) { $('gate_msg').style.display='block'; $('gate_msg').className='msg err';
+    $('gate_msg').innerHTML = 'Tu usuario no tiene ninguna empresa asignada todavía. Escríbenos a <b>fonseca@financialcr.com</b>.'; return; }
+
+  CLIENTES = cls;
+  const sel = $('cl-sel');
+  if (cls.length > 1) {
+    sel.hidden = false;
+    sel.innerHTML = cls.map(c => '<option value="' + esc(c.client_id) + '">' + esc(c.code || c.rfc) + ' · ' + esc(c.name || '') + '</option>').join('');
+    sel.addEventListener('change', () => cargaCliente(cls.find(c => c.client_id === sel.value)));
+  }
+  const conDatos = cls.find(c => c.periodo_balanza) || cls[0];
+  if (cls.length > 1) sel.value = conDatos.client_id;
+  $('btn-salir').textContent = iniciales(session.user.email.split('@')[0]);
+  abrirApp();
+  await cargaCliente(conDatos);
 }
-document.body.style.overflow='hidden';
+
+async function cargaCliente(c){
+  ACTUAL = c;
+  $('cl-ini').textContent = iniciales(c.name || c.code);
+  $('cl-nom').textContent = c.name || c.code || c.rfc;
+  $('cl-meta').innerHTML = 'RFC: ' + esc(c.rfc) +
+    (c.contalink_tier ? ' · ' + (c.contalink_tier === 'contable' ? 'Contabilidad completa' : 'Solo CFDI') : '');
+  $('hola').textContent = (c.name || c.code || '').split(/[ ,]/)[0];
+
+  if (c.ultima_actualizacion) {
+    const d = new Date(c.ultima_actualizacion);
+    const dias = Math.floor((Date.now() - d.getTime()) / 86400000);
+    $('sync-txt').textContent = 'ContaLink · ' + (dias === 0 ? 'actualizado hoy' : dias === 1 ? 'actualizado ayer' : 'hace ' + dias + ' días');
+    $('sync').classList.toggle('stale', dias > 2);
+  } else { $('sync-txt').textContent = 'Sin sincronizar'; $('sync').classList.add('stale'); }
+
+  $('resumen-sub').textContent = c.periodo_balanza
+    ? 'Cifras contables al cierre de ' + periodoLargo(c.periodo_balanza) + '.'
+    : 'Todavía no hay contabilidad cargada para esta empresa.';
+
+  pintaResumen(c);
+  await Promise.all([ cargaER(c), cargaFlujo(c), cargaFacturas(c), cargaImpuestos(c),
+                      cargaConciliacion(c), cargaFrescura(c), cargaSAT(c), cargaHistorial(c) ]);
+}
+
+/* ---------- RESUMEN ---------- */
+function pintaResumen(c){
+  const ing = N(c.ingresos_mes), egr = (N(c.gastos_mes) || 0), res = N(c.utilidad_mes);
+  $('k-ing').textContent = K(ing);
+  $('k-egr').textContent = K(egr);
+  $('k-res').textContent = K(res);
+  $('k-res-d').textContent = c.margen_pct_acum !== null && c.margen_pct_acum !== undefined
+    ? 'Margen acumulado ' + Number(c.margen_pct_acum).toFixed(1) + '%' : '';
+  $('k-res-d').className = 'kpi-delta ' + (res >= 0 ? 'up' : 'down');
+  const sinPolizas = (!ing && !egr);
+  $('k-ing-d').textContent = sinPolizas ? 'Sin pólizas en el mes' : 'Acumulado ' + K(N(c.ingresos_acum));
+  $('k-egr-d').textContent = sinPolizas ? 'Sin pólizas en el mes' : 'Acumulado ' + K(N(c.gastos_acum));
+  $('k-imp').textContent = K(N(c.bancos));
+  $('k-imp-d').textContent = 'Saldo en bancos';
+  document.querySelector('#resumen .kpi-label').textContent = 'Ingresos del mes';
+  const lbls = document.querySelectorAll('#resumen .kpi-label');
+  if (lbls[3]) lbls[3].textContent = 'Bancos';
+}
+
+/* ---------- Estado de resultados + gráfica ---------- */
+async function cargaER(c){
+  const { data } = await DB.from('v_portal_estado_resultados')
+    .select('periodo,ingresos_mes,gastos_mes,financieros_mes,ingresos_acum,gastos_acum,financieros_acum,utilidad_acum,margen_pct_acum')
+    .eq('client_id', c.client_id).order('periodo');
+  const rows = data || [];
+  const ult = rows[rows.length - 1];
+  if (ult) {
+    $('f-ing').textContent = K(N(ult.ingresos_acum));
+    $('f-egr').textContent = K((N(ult.gastos_acum)||0) + (N(ult.financieros_acum)||0));
+    $('f-res').textContent = K(N(ult.utilidad_acum));
+    $('f-res-d').textContent = ult.margen_pct_acum !== null ? 'Margen ' + Number(ult.margen_pct_acum).toFixed(1) + '%' : '';
+    $('f-res-d').className = 'kpi-delta ' + (N(ult.utilidad_acum) >= 0 ? 'up' : 'down');
+    $('f-ing-d').textContent = 'Al cierre de ' + periodoLargo(ult.periodo);
+    $('f-egr-d').textContent = 'Incluye gastos financieros';
+  }
+  const conMov = rows.filter(r => N(r.ingresos_mes) || N(r.gastos_mes));
+  const chart = $('chart');
+  if (!conMov.length) {
+    chart.innerHTML = '<div class="empty">Todavía no hay meses con pólizas registradas.<br>La gráfica aparece en cuanto se contabilice el primer mes.</div>';
+  } else {
+    const serie = conMov.slice(-6).map(r => ({
+      m: MES[+String(r.periodo).slice(5,7) - 1],
+      inc: N(r.ingresos_mes) || 0,
+      egr: (N(r.gastos_mes)||0) + (N(r.financieros_mes)||0) }));
+    const max = Math.max(...serie.flatMap(d => [d.inc, d.egr])) || 1;
+    chart.innerHTML = serie.map(d =>
+      '<div class="bargroup"><div class="bars">' +
+      '<div class="bar inc" style="height:0" data-h="' + (d.inc/max*100) + '" title="Ingresos ' + MXN(d.inc) + '"></div>' +
+      '<div class="bar egr" style="height:0" data-h="' + (d.egr/max*100) + '" title="Egresos ' + MXN(d.egr) + '"></div>' +
+      '</div><div class="bar-x">' + d.m + '</div></div>').join('');
+    setTimeout(() => document.querySelectorAll('.bar').forEach(b => b.style.height = b.dataset.h + '%'), 120);
+    if (serie.length < 3) chart.insertAdjacentHTML('afterend',
+      '<div class="empty" style="padding-top:4px">Solo hay ' + serie.length + ' mes con pólizas contabilizadas. ' +
+      'La comparativa se vuelve útil cuando haya al menos tres.</div>');
+  }
+}
+
+/* ---------- Movimientos bancarios ---------- */
+async function cargaFlujo(c){
+  const { data } = await DB.from('movimientos')
+    .select('fecha,descripcion,cargo,abono,cuenta_contable,tercero,cfdi_id')
+    .eq('client_id', c.client_id).order('fecha', {ascending:false}).limit(25);
+  const b = $('mov-body'), rows = data || [];
+  if (!rows.length) { vacio(b, 'Sin movimientos bancarios cargados.'); $('mov-pill').textContent = '—'; return; }
+  $('mov-pill').textContent = 'Últimos ' + rows.length;
+  b.innerHTML = rows.map(r => {
+    const entra = N(r.abono) > 0, monto = entra ? N(r.abono) : -(N(r.cargo) || 0);
+    return '<tr><td class="tnum">' + fechaCorta(r.fecha) + '</td>' +
+      '<td class="t-strong">' + esc(r.descripcion || r.tercero || '—') + '</td>' +
+      '<td><span class="badge ' + (entra ? 'b-ok' : 'b-red') + '">' + (entra ? 'Entrada' : 'Salida') + '</span></td>' +
+      '<td>' + esc(r.cuenta_contable || '—') + '</td>' +
+      '<td style="text-align:right;color:' + (entra ? 'var(--green-d)' : 'var(--neg)') + '" class="money">' +
+        (entra ? '+' : '') + MXN(monto) + '</td>' +
+      '<td>' + (r.cfdi_id ? '<span class="badge b-green">Ligado</span>' : '<span class="badge b-gray">—</span>') + '</td></tr>';
+  }).join('');
+}
+
+/* ---------- Facturas ---------- */
+let FAC = { emitidas: [], recibidas: [] };
+async function cargaFacturas(c){
+  const [em, re] = await Promise.all([
+    DB.from('cfdi').select('fecha,folio,serie,contraparte_nombre,contraparte_rfc,total,metodo_pago,pagado,fecha_pago,importe_pendiente')
+      .eq('client_id', c.client_id).eq('tipo','emitido').order('fecha',{ascending:false}).limit(200),
+    DB.from('cfdi').select('fecha,folio,serie,contraparte_nombre,contraparte_rfc,total,metodo_pago,pagado,fecha_pago,importe_pendiente')
+      .eq('client_id', c.client_id).eq('tipo','recibido').order('fecha',{ascending:false}).limit(200)
+  ]);
+  FAC.emitidas = em.data || []; FAC.recibidas = re.data || [];
+  $('n-emi').textContent = FAC.emitidas.length;
+  $('n-rec').textContent = FAC.recibidas.length;
+  renderFac('emitidas');
+}
+function renderFac(cual){
+  const rows = FAC[cual], b = $('fac-body');
+  if (!rows.length) { vacio(b, 'Sin facturas ' + cual + '.'); return; }
+  b.innerHTML = rows.slice(0,60).map(r =>
+    '<tr><td class="tnum">' + fecha(r.fecha) + '</td>' +
+    '<td class="t-strong tnum">' + esc([r.serie, r.folio].filter(Boolean).join('-') || '—') + '</td>' +
+    '<td>' + esc(r.contraparte_nombre || r.contraparte_rfc || '—') + '</td>' +
+    '<td style="text-align:right" class="money">' + MXN(N(r.total)) + '</td>' +
+    '<td><span class="badge ' + (r.metodo_pago === 'PUE' ? 'b-green' : 'b-gray') + '">' + esc(r.metodo_pago || '—') + '</span></td>' +
+    '<td style="text-align:right">' + (r.pagado
+        ? '<span class="badge b-ok">' + (r.fecha_pago ? fechaCorta(r.fecha_pago) : 'Liquidada') + '</span>'
+        : '<span class="badge b-warn">Pendiente ' + MXN(N(r.importe_pendiente) || N(r.total)) + '</span>') + '</td></tr>').join('');
+}
+document.querySelectorAll('.tab[data-fac]').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab[data-fac]').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  renderFac(t.dataset.fac === 'emitidas' ? 'emitidas' : 'recibidas');
+}));
+
+/* ---------- Impuestos ---------- */
+async function cargaImpuestos(c){
+  const { data } = await DB.from('impuestos')
+    .select('periodo,isr,iva_causado,iva_acreditable,ret_isr,ret_iva,retenciones,importe_total,fecha_limite,presentada,pagada,base_calculo')
+    .eq('client_id', c.client_id).order('periodo');
+  const rows = data || [], b = $('imp-body');
+  if (!rows.length) { vacio(b, 'Sin cálculo de impuestos cargado.'); $('imp-base').textContent = '—'; return; }
+  $('imp-base').textContent = rows[0].base_calculo === 'cobros_y_pagos' ? 'Base: cobros y pagos' : 'Base: CFDI (previo)';
+  b.innerHTML = rows.map(r => {
+    const ret = (N(r.ret_isr)||0) + (N(r.ret_iva)||0) || N(r.retenciones) || 0;
+    const tot = N(r.importe_total);
+    const est = r.pagada ? ['b-ok','Pagada'] : r.presentada ? ['b-ok','Presentada']
+      : (tot && tot > 0) ? ['b-warn','Por presentar'] : ['b-gray','Sin saldo'];
+    return '<tr><td class="t-strong">' + periodoLargo(r.periodo) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(N(r.isr)) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(N(r.iva_causado)) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(N(r.iva_acreditable)) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(ret) + '</td>' +
+      '<td style="text-align:right" class="money"><b>' + MXN(tot) + '</b></td>' +
+      '<td><span class="badge ' + est[0] + '">' + est[1] + '</span></td></tr>';
+  }).join('');
+
+  const sum = f => rows.reduce((a, r) => a + (N(r[f]) || 0), 0);
+  $('t-isr').textContent = MXN(sum('isr'));
+  $('t-iva').textContent = MXN(sum('iva_causado'));
+  $('t-ret').textContent = MXN(sum('ret_isr') + sum('ret_iva'));
+  $('t-tot').textContent = K(sum('importe_total'));
+
+  const hoy = new Date().toISOString().slice(0,10);
+  const prox = rows.filter(r => r.fecha_limite && r.fecha_limite >= hoy && !r.pagada)
+                   .sort((a,b) => a.fecha_limite < b.fecha_limite ? -1 : 1)[0];
+  if (prox) {
+    const dias = Math.max(0, Math.ceil((new Date(prox.fecha_limite) - new Date(hoy)) / 86400000));
+    const txt = 'Declaración mensual ' + periodoLargo(prox.periodo) + ' — por presentar';
+    const sub = 'Vence el <b style="color:var(--green-br)">' + fecha(prox.fecha_limite) + '</b> · ISR ' +
+                MXN(N(prox.isr)) + ' · IVA ' + MXN(N(prox.iva_causado)) + ' · Total ' + MXN(N(prox.importe_total));
+    ['', '2'].forEach(sfx => {
+      const box = $('dl' + sfx + '-box'); if (!box) return;
+      box.hidden = false;
+      $('dl' + sfx + '-num').innerHTML = dias + '<small>días</small>';
+      $('dl' + sfx + '-tit').textContent = sfx ? txt : 'Próximo vencimiento: ' + txt;
+      $('dl' + sfx + '-sub').innerHTML = sub;
+    });
+  }
+}
+
+/* ---------- Conciliación de control ---------- */
+async function cargaConciliacion(c){
+  const { data } = await DB.from('v_portal_conciliacion_saldos')
+    .select('concepto,saldo_balanza,saldo_antiguedad,diferencia,semaforo,periodo_balanza,corte_antiguedad')
+    .eq('client_id', c.client_id);
+  const rows = data || [], box = $('conc-list');
+  if (!rows.length) { box.innerHTML = '<div class="empty">Sin datos suficientes para conciliar.</div>'; return; }
+  box.innerHTML = rows.map(r =>
+    '<div class="conc-row"><span class="conc-k">' + esc(r.concepto) + '</span>' +
+    '<span><span class="badge ' + (r.semaforo === 'verde' ? 'b-ok' : r.semaforo === 'ambar' ? 'b-warn' : 'b-red') + '">' +
+    (r.semaforo === 'verde' ? 'Cuadra' : 'Dif. ' + K(N(r.diferencia))) + '</span></span></div>' +
+    '<div class="conc-row" style="padding-top:0;border-bottom:none"><span class="conc-k" style="font-size:11.5px">Contabilidad ' +
+    MXN(N(r.saldo_balanza)) + ' · Documentos ' + MXN(N(r.saldo_antiguedad)) + '</span></div>').join('');
+
+  const rojos = rows.filter(r => r.semaforo === 'rojo');
+  if (rojos.length) {
+    $('alerta-cuadre').innerHTML = '<div class="alert-c">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>' +
+      '<div>Hay <b>' + rojos.length + '</b> ' + (rojos.length === 1 ? 'concepto' : 'conceptos') +
+      ' donde la contabilidad no coincide con los documentos: ' +
+      rojos.map(r => '<b>' + esc(r.concepto) + '</b> (' + K(N(r.diferencia)) + ')').join(', ') +
+      '. Suele significar CFDI timbrados que todavía no se contabilizan. ' +
+      '<a href="#" onclick="go(\'impuestos\');return false" style="color:#5E4408;font-weight:600">Ver el detalle</a></div></div>';
+  } else $('alerta-cuadre').innerHTML = '';
+  const badge = $('nav-badge');
+  badge.textContent = rojos.length; badge.hidden = rojos.length === 0;
+}
+
+/* ---------- Cumplimiento / frescura ---------- */
+const NOMBRE_FUENTE = { balanza:'Balanza de comprobación', cfdi:'Facturas (CFDI)',
+  antiguedad_saldos:'Antigüedad de saldos', movimientos:'Movimientos bancarios', impuestos:'Cálculo de impuestos' };
+async function cargaFrescura(c){
+  const { data } = await DB.from('v_portal_frescura_datos')
+    .select('fuente,filas,ultima_verificacion,dias_sin_verificar,semaforo').eq('client_id', c.client_id);
+  const rows = data || [], box = $('cumpl');
+  if (!rows.length) { box.innerHTML = '<div class="empty">Sin fuentes conectadas.</div>'; return; }
+  const ok = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  const wa = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 8v4M12 16h.01"/></svg>';
+  box.innerHTML = rows.map(r => {
+    const verde = r.semaforo === 'verde';
+    const d = r.dias_sin_verificar;
+    const sub = r.filas ? r.filas.toLocaleString('es-MX') + ' registros · ' +
+      (d === 0 ? 'verificado hoy' : d === 1 ? 'verificado ayer' : 'hace ' + d + ' días') : 'sin datos';
+    return '<div class="status-item"><span class="s-ic ' + (verde ? 's-ok' : 's-warn') + '">' + (verde ? ok : wa) + '</span>' +
+      '<div><div class="s-txt">' + esc(NOMBRE_FUENTE[r.fuente] || r.fuente) + '</div><div class="s-sub">' + esc(sub) + '</div></div>' +
+      '<span class="s-state ' + (verde ? 'st-ok' : 'st-warn') + '" style="margin-left:auto">' +
+      (verde ? 'Al día' : r.semaforo === 'sin_datos' ? 'Sin datos' : 'Atrasado') + '</span></div>';
+  }).join('');
+
+  const docs = rows.map(r => ['<path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/>',
+    esc(NOMBRE_FUENTE[r.fuente] || r.fuente), (r.filas || 0).toLocaleString('es-MX') + ' registros en el portal']);
+  $('doc-grid').innerHTML = docs.map(d =>
+    '<div class="card doc-card"><div class="doc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    d[0] + '</svg></div><div class="doc-t">' + d[1] + '</div><div class="doc-d">' + d[2] + '</div></div>').join('');
+}
+
+/* ---------- Datos SAT ---------- */
+async function cargaSAT(c){
+  const { data } = await DB.from('clients')
+    .select('name,rfc,regime,client_status,contact_email,start_date,contalink_tier')
+    .eq('id', c.client_id).maybeSingle();
+  if (!data) return;
+  $('sat-nom').textContent = data.name || '—';
+  $('sat-rfc').textContent = data.rfc || '—';
+  $('sat-reg').textContent = data.regime || (data.rfc && data.rfc.length === 12 ? 'Persona moral' : 'Persona física');
+  $('sat-est').innerHTML = '<span class="badge ' + (data.client_status === 'active' || !data.client_status ? 'b-ok' : 'b-gray') + '">' +
+    esc(data.client_status || 'Activo') + '</span>';
+  $('sat-mail').textContent = data.contact_email || '—';
+  $('sat-alta').textContent = data.start_date ? fecha(data.start_date) : '—';
+  $('sat-pill').textContent = data.rfc && data.rfc.length === 12 ? 'Persona moral' : 'Persona física';
+}
+
+/* ---------- Historial ---------- */
+async function cargaHistorial(c){
+  const { data } = await DB.from('etl_cargas')
+    .select('corrida,reporte,estatus,filas_insertadas,filas_actualizadas,mensaje,inicio')
+    .eq('rfc', c.rfc).order('inicio', {ascending:false}).limit(40);
+  const rows = data || [], box = $('timeline');
+  if (!rows.length) { box.innerHTML = '<div class="empty">Sin sincronizaciones registradas.</div>'; return; }
+  box.innerHTML = rows.map((r, i) => {
+    const dot = r.estatus === 'error' ? 'warn' : i === 0 ? 'br' : '';
+    const n = (r.filas_insertadas || 0), u = (r.filas_actualizadas || 0);
+    const cuenta = r.estatus === 'error' ? 'No se ejecutó'
+      : n || u ? (n ? n + ' nuevos' : '') + (n && u ? ' · ' : '') + (u ? u + ' actualizados' : '')
+      : 'Sin cambios';
+    return '<div class="tl-item"><span class="tl-dot ' + dot + '"></span>' +
+      '<div class="tl-date">' + fecha(r.inicio) + '</div>' +
+      '<div class="tl-t">' + esc(r.reporte) + ' · ' + esc(cuenta) + '</div>' +
+      '<div class="tl-d">' + esc((r.mensaje || '').slice(0, 220)) + '</div></div>';
+  }).join('');
+}
+
+
+/* ================= DEMOSTRACIÓN =================
+   Empresa ficticia. Ningún dato de aquí sale de Supabase ni de
+   ContaLink: se genera en el navegador y nunca toca la base. */
+const D_ID = 'demo-0000', D_RFC = 'DEM250101QX8';
+const HOY = new Date();
+function dm(m){ // m = 1..6 contando hacia atras desde el mes actual
+  const d = new Date(HOY.getFullYear(), HOY.getMonth() - (6 - m), 1);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
+}
+function dlim(m){ // el ultimo periodo vence en 9 dias; los anteriores ya pasaron
+  const d = m === 6 ? new Date(HOY.getFullYear(), HOY.getMonth(), HOY.getDate() + 9)
+                    : new Date(HOY.getFullYear(), HOY.getMonth() - (6 - m) + 1, 17);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+const D_ER = [
+  {m:1,i:402000,g:301000}, {m:2,i:438000,g:288000}, {m:3,i:471000,g:334000},
+  {m:4,i:455000,g:312000}, {m:5,i:432000,g:300000}, {m:6,i:486200,g:312850}
+].map((r,idx,a) => {
+  const ia = a.slice(0,idx+1).reduce((s,x)=>s+x.i,0), ga = a.slice(0,idx+1).reduce((s,x)=>s+x.g,0);
+  return { client_id:D_ID, rfc:D_RFC, periodo:dm(r.m), ingresos_mes:r.i, gastos_mes:r.g, financieros_mes:1800,
+    ingresos_acum:ia, gastos_acum:ga, financieros_acum:1800*(idx+1), costos_acum:0, costos_mes:0,
+    utilidad_acum:ia-ga-1800*(idx+1), utilidad_mes:r.i-r.g-1800,
+    margen_pct_acum:+(((ia-ga-1800*(idx+1))/ia)*100).toFixed(2) };
+});
+const D_CLI = { id:D_ID, name:'Empresa Demo, S.A. de C.V.', rfc:D_RFC, regime:'General de Ley P. Morales (601)',
+  client_status:'active', contact_email:'contacto@empresademo.mx', start_date:'2025-01-15', contalink_tier:'contable' };
+const D_KPI = Object.assign({}, D_ER[5], { client_id:D_ID, code:'DEMO', name:D_CLI.name, rfc:D_RFC,
+  contalink_tier:'contable', periodo_balanza:dm(6), bancos:842500, activo:1284300, pasivo:456800,
+  capital_total:827500, descuadre:0, corte_antiguedad:'2026-06-30',
+  cxc_total:318400, cxc_vencido:74200, cxp_total:196300, cxp_vencido:41800,
+  ultima_actualizacion:new Date(Date.now()-6*3600e3).toISOString() });
+const D_CONC = [
+  {client_id:D_ID, concepto:'Clientes / CxC', saldo_balanza:318400, saldo_antiguedad:318400, diferencia:0, semaforo:'verde', periodo_balanza:dm(6), corte_antiguedad:'2026-06-30'},
+  {client_id:D_ID, concepto:'Proveedores / CxP', saldo_balanza:196300, saldo_antiguedad:196300, diferencia:0, semaforo:'verde', periodo_balanza:dm(6), corte_antiguedad:'2026-06-30'}
+];
+const D_FRES = [['balanza',214],['cfdi',1043],['antiguedad_saldos',86],['movimientos',612],['impuestos',6]]
+  .map(([f,n]) => ({client_id:D_ID, fuente:f, filas:n, ultima_verificacion:new Date(Date.now()-6*3600e3).toISOString(),
+    ultimo_cambio:new Date(Date.now()-6*3600e3).toISOString(), dias_sin_verificar:0, semaforo:'verde'}));
+const D_MOV = [
+  ['2026-06-30','Venta de mercancía · Factura F-1043','102-01-001',84200,0,1],
+  ['2026-06-28','Pago a proveedor · MP electrónica','201-01-004',0,32540,1],
+  ['2026-06-26','Venta de mercancía · Factura F-1041','102-01-001',56800,0,1],
+  ['2026-06-24','Renta de oficina','601-25-001',0,28000,1],
+  ['2026-06-21','Pago de nómina 2a quincena','601-01-001',0,61300,0],
+  ['2026-06-18','Venta de mercancía · Factura F-1038','102-01-001',92100,0,1],
+  ['2026-06-15','Servicios de telecomunicaciones','601-50-001',0,1240,1],
+  ['2026-06-12','Comisión bancaria mensual','701-10-001',0,480,0],
+  ['2026-06-08','Venta de servicios · Factura F-1036','102-01-001',41500,0,1],
+  ['2026-06-03','Pago de energía eléctrica','601-51-001',0,7830,1]
+].map(r => ({client_id:D_ID, rfc:D_RFC, fecha:r[0], descripcion:r[1], cuenta_contable:r[2],
+  abono:r[3], cargo:r[4], cfdi_id:r[5]?'x':null, tercero:null}));
+function dfac(t, rows){ return rows.map(r => ({client_id:D_ID, rfc:D_RFC, tipo:t, fecha:r[0], serie:r[1], folio:r[2],
+  contraparte_nombre:r[3], contraparte_rfc:'XAXX010101000', total:r[4], metodo_pago:r[5],
+  pagado:r[6], fecha_pago:r[6]?r[0]:null, importe_pendiente:r[6]?0:r[4]})); }
+const D_EMI = dfac('emitido', [
+  ['2026-06-30','F','1043','Distribuidora Kai, S.A. de C.V.',97672,'PUE',true],
+  ['2026-06-26','F','1041','Grupo Hannah, S.C.',65888,'PUE',true],
+  ['2026-06-18','F','1038','Comercial JP, S.A. de C.V.',106836,'PPD',false],
+  ['2026-06-09','F','1036','Servicios Fonseca, S.A. de C.V.',48140,'PUE',true],
+  ['2026-06-03','F','1031','Distribuidora Kai, S.A. de C.V.',38280,'PPD',false],
+  ['2026-05-28','F','1029','Grupo Hannah, S.C.',52200,'PUE',true],
+  ['2026-05-19','F','1026','Comercial JP, S.A. de C.V.',71340,'PUE',true]
+]);
+const D_REC = dfac('recibido', [
+  ['2026-06-28','A','8841','Insumos del Bajío, S.A. de C.V.',32540,'PUE',true],
+  ['2026-06-24','R','2210','Inmuebles Liam, S.A. de C.V.',32480,'PUE',true],
+  ['2026-06-15','','150124','Teléfonos de México, S.A.B.',1240,'PUE',true],
+  ['2026-06-11','B','0092','HDI Seguros, S.A. de C.V.',1800,'PPD',false],
+  ['2026-06-03','C','5567','CFE Suministrador de Servicios',7830,'PUE',true]
+]);
+const D_IMP = [[1,11200,14800,3600,980],[2,13450,17200,3750,1120],[3,12900,16400,3540,1050],
+  [4,14100,18100,4000,1210],[5,12690,15900,3160,940],[6,14900,18540,3640,1080]]
+  .map(r => ({client_id:D_ID, rfc:D_RFC, periodo:dm(r[0]), isr:r[1], iva_causado:r[2], iva_acreditable:r[3],
+    ret_isr:r[4], ret_iva:0, retenciones:r[4], importe_total:r[1]+r[2]-r[3]-r[4],
+    fecha_limite:dlim(r[0]), base_calculo:'cobros_y_pagos',
+    presentada:r[0] < 6, pagada:r[0] < 6}));
+const D_HIST = [
+  ['balanza-comprobacion','cargado',214,0,'Periodo 2026-06. Debe = Haber. Saldo final de bancos cuadra contra el auxiliar.'],
+  ['cfdi-emitidos','cargado',4,39,'43 CFDI emitidos del ejercicio, total 1,043,200.00.'],
+  ['cfdi-recibidos','cargado',6,122,'128 CFDI recibidos del ejercicio, total 687,400.00.'],
+  ['cuentas-por-cobrar','cargado',18,0,'Antigüedad CxC al 2026-06-30. Suma del detalle igual al Total de Reporte.'],
+  ['cuentas-por-pagar','cargado',12,0,'Antigüedad CxP al 2026-06-30. Tramos cuadran al centavo con el panel.'],
+  ['auxiliar-cuentas','cargado',9,0,'612 movimientos de bancos del ejercicio.'],
+  ['impuestos','cargado',0,6,'Matriz de 12 meses. Base: cobros y pagos.']
+].map((r,i) => ({rfc:D_RFC, corrida:'2026-06-30', reporte:r[0], estatus:r[1], filas_insertadas:r[2],
+  filas_actualizadas:r[3], mensaje:r[4], inicio:new Date(Date.now()-6*3600e3 - i*90e3).toISOString()}));
+
+function demoDB(){
+  const T = { v_portal_kpis:[D_KPI], v_portal_estado_resultados:D_ER, v_portal_conciliacion_saldos:D_CONC,
+    v_portal_frescura_datos:D_FRES, movimientos:D_MOV, cfdi:D_EMI.concat(D_REC),
+    impuestos:D_IMP, etl_cargas:D_HIST, clients:[D_CLI] };
+  function q(rows){
+    const o = { _r: rows.slice(), select(){ return o; },
+      eq(c,v){ o._r = o._r.filter(r => String(r[c]) === String(v)); return o; },
+      order(c,op){ const dir = op && op.ascending === false ? -1 : 1;
+        o._r.sort((a,b) => a[c] === b[c] ? 0 : (a[c] > b[c] ? dir : -dir)); return o; },
+      limit(n){ o._r = o._r.slice(0,n); return o; },
+      maybeSingle(){ return Promise.resolve({data:o._r[0] || null, error:null}); },
+      then(cb){ return Promise.resolve({data:o._r, error:null}).then(cb); } };
+    return o;
+  }
+  return { from(t){ return q(T[t] || []); } };
+}
+
+function verPrototipo(){
+  DEMO = true; DB = demoDB();
+  $('banner-demo').hidden = false;
+  $('cl-sel').hidden = true;
+  $('btn-salir').textContent = 'DM';
+  $('btn-salir').title = 'Salir de la demostración';
+  abrirApp();
+  cargaCliente(D_KPI);
+}
+window.verPrototipo = verPrototipo;
+
+/* ---------- inicio ---------- */
+sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_IN') arranca(); });
+arranca();
+
 </script>
 </body>
 </html>
