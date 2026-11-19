@@ -146,6 +146,40 @@
   .money{font-variant-numeric:tabular-nums;font-weight:500}
 
   /* Tabs */
+  .kpi.click{cursor:pointer;transition:transform .14s,box-shadow .14s,border-color .14s}
+  .kpi.click:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(51,49,51,.09);border-color:var(--green-2)}
+  .kpi-go{font-size:11px;color:var(--green-d);font-weight:600;margin-top:6px}
+  .filtros{display:flex;flex-wrap:wrap;gap:8px;padding:14px;border-bottom:1px solid var(--line);align-items:flex-end}
+  .filtros label{display:flex;flex-direction:column;gap:3px;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .filtros input,.filtros select,.fx input,.fx select,.fx textarea{font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:400}
+  .filtros input:focus,.filtros select:focus,.fx input:focus,.fx select:focus,.fx textarea:focus{outline:2px solid var(--green-br);border-color:transparent}
+  .filtros label[hidden]{display:none}
+  .filtros .w-s{width:120px}.filtros .w-m{width:150px}.filtros .w-l{width:210px}
+  .btn-s{font:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--green-3);background:var(--green-wash);color:var(--green-d);cursor:pointer}
+  .btn-s:hover{background:var(--green-3)}
+  .btn-p{font:inherit;font-size:13px;font-weight:600;padding:9px 16px;border-radius:9px;border:none;background:var(--green);color:#fff;cursor:pointer}
+  .btn-p:hover{background:var(--green-d)}.btn-p:disabled{opacity:.6;cursor:default}
+  .fac-sum{display:flex;flex-wrap:wrap;gap:18px;padding:10px 14px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line-2)}
+  .fac-sum b{color:var(--ink)}
+  .fac-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .fac-head .tabs{margin-bottom:0}
+  .tr-click{cursor:pointer}.tr-click:hover td{background:var(--green-wash)}
+  .modal{position:fixed;inset:0;background:rgba(40,42,40,.45);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .modal[hidden]{display:none}
+  .modal-box{background:#fff;border-radius:14px;max-width:760px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .modal-h{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .modal-h h3{font-size:17px;color:var(--ink)}
+  .modal-x{border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted)}
+  .modal-b{padding:18px 22px}
+  .fx{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 14px}
+  .fx label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted);font-weight:600}
+  .fx .full{grid-column:1/-1}
+  .fx-sec{grid-column:1/-1;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--green-d);font-weight:700;margin-top:6px}
+  .con-row{display:grid;grid-template-columns:2.4fr .7fr 1fr .9fr 1fr auto;gap:8px;align-items:end;grid-column:1/-1}
+  .con-row label{min-width:0}.con-row input,.con-row select{width:100%;min-width:0}
+  .fx input,.fx select,.fx textarea{width:100%}
+  .modal-f{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  @media(max-width:640px){.fx{grid-template-columns:1fr}.con-row{grid-template-columns:1fr 1fr}}
   .tabs{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px;margin-bottom:16px}
   .tab{padding:7px 16px;border-radius:6px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--font)}
   .tab.active{background:var(--surface);color:var(--green-d);box-shadow:var(--shadow)}
@@ -302,6 +336,44 @@
   </div>
 </div>
 
+<div class="modal" id="sol-modal" hidden onclick="if(event.target===this)cierraSolicitud()">
+  <div class="modal-box">
+    <div class="modal-h"><h3>Solicitar una factura</h3><button class="modal-x" onclick="cierraSolicitud()">×</button></div>
+    <form id="sol-form" onsubmit="return enviaSolicitud(event)">
+    <div class="modal-b"><div class="fx">
+      <div class="fx-sec">Datos de tu cliente (receptor)</div>
+      <label>RFC<input id="s-rfc" required maxlength="13" placeholder="XAXX010101000" style="text-transform:uppercase"></label>
+      <label>Nombre o razón social (como en su constancia)<input id="s-nom" required></label>
+      <label>Código postal fiscal<input id="s-cp" required pattern="[0-9]{5}" maxlength="5"></label>
+      <label>Régimen fiscal<select id="s-reg" required>
+        <option value="">Selecciona…</option><option value="601">601 General de Ley Personas Morales</option><option value="603">603 Personas Morales sin fines de lucro</option>
+        <option value="605">605 Sueldos y Salarios</option><option value="606">606 Arrendamiento</option><option value="612">612 Actividades Empresariales y Profesionales</option>
+        <option value="616">616 Sin obligaciones fiscales</option><option value="621">621 Incorporación Fiscal</option><option value="625">625 Plataformas Tecnológicas</option>
+        <option value="626">626 Régimen Simplificado de Confianza</option></select></label>
+      <label>Uso del CFDI<select id="s-uso" required>
+        <option value="G03">G03 Gastos en general</option><option value="G01">G01 Adquisición de mercancías</option><option value="I04">I04 Equipo de cómputo</option>
+        <option value="D01">D01 Honorarios médicos</option><option value="S01">S01 Sin efectos fiscales</option><option value="CP01">CP01 Pagos</option></select></label>
+      <label>Correo para enviarle la factura<input id="s-mail" type="email"></label>
+      <div class="fx-sec">Pago</div>
+      <label>Método de pago<select id="s-met" required><option value="PUE">PUE · Pago en una sola exhibición</option><option value="PPD">PPD · Pago en parcialidades o diferido</option></select></label>
+      <label>Forma de pago<select id="s-forma" required>
+        <option value="03">03 Transferencia</option><option value="01">01 Efectivo</option><option value="02">02 Cheque</option>
+        <option value="04">04 Tarjeta de crédito</option><option value="28">28 Tarjeta de débito</option><option value="99">99 Por definir</option></select></label>
+      <label>Moneda<select id="s-mon"><option>MXN</option><option>USD</option><option>EUR</option></select></label>
+      <label>IVA<select id="s-iva"><option value="0.16">16%</option><option value="0.08">8% (frontera)</option><option value="0">0% / exento</option></select></label>
+      <div class="fx-sec">Conceptos</div>
+      <div id="s-conceptos" class="full" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="full"><button type="button" class="btn-s" onclick="agregaConcepto()">+ Agregar concepto</button></div>
+      <label class="full">Notas para tu contador<textarea id="s-notas" rows="2" placeholder="Ej. referencia de pedido, retenciones, fecha deseada"></textarea></label>
+    </div></div>
+    <div class="modal-f">
+      <div id="s-tot" class="tnum" style="font-size:13px;color:var(--muted)">&nbsp;</div>
+      <div style="display:flex;gap:8px;align-items:center"><span id="s-msg" style="font-size:12.5px"></span><button type="submit" class="btn-p" id="s-btn">Enviar solicitud</button></div>
+    </div>
+    </form>
+  </div>
+</div>
+
 <div class="app">
   <aside class="side" id="side">
     <div class="brand">
@@ -311,10 +383,12 @@
       <div class="nav-label">Principal</div>
       <button class="nav-item active" data-view="resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Resumen</button>
       <button class="nav-item" data-view="flujo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>Ingresos y Egresos</button>
+      <button class="nav-item" data-view="bancos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9 10v8M15 10v8M19 10v8"/><path d="M3 21h18"/></svg>Bancos</button>
       <button class="nav-item" data-view="facturas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>Facturas</button>
       <button class="nav-item" data-view="impuestos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Impuestos y Declaraciones<span class="nav-badge" id="nav-badge" hidden>0</span></button>
       <div class="nav-label">Documentos</div>
       <button class="nav-item" data-view="documentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 3h8a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Expediente Fiscal</button>
+      <button class="nav-item" data-view="balanza"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7h14"/><path d="M5 7l-3 7h6zM19 7l-3 7h6z"/></svg>Balanza</button>
       <button class="nav-item" data-view="fiscal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01M12 9h.01M15 9h.01M9 13h.01M12 13h.01M15 13h.01"/></svg>Datos ante el SAT</button>
       <button class="nav-item" data-view="historial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9 9 0 00-9 9z"/><path d="M12 7v5l3 2"/></svg>Historial</button>
     </nav>
@@ -365,23 +439,23 @@
       </div>
 
       <div class="grid kpis">
-        <div class="card kpi">
-          <div class="kpi-top"><span class="kpi-label">Ingresos del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
+        <div class="card kpi click" onclick="verFacturas('emitidas','ejercicio')" title="Ver las facturas emitidas del ejercicio">
+          <div class="kpi-top"><span class="kpi-label">Ingresos del ejercicio</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
           <div class="kpi-val tnum" id="k-ing">—</div>
           <div class="kpi-delta up" id="k-ing-d">&nbsp;</div>
         </div>
-        <div class="card kpi">
-          <div class="kpi-top"><span class="kpi-label">Egresos del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span></div>
+        <div class="card kpi click" onclick="verFacturas('recibidas','ejercicio')" title="Ver las facturas recibidas del ejercicio">
+          <div class="kpi-top"><span class="kpi-label">Egresos del ejercicio</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span></div>
           <div class="kpi-val tnum" id="k-egr">—</div>
           <div class="kpi-delta down" id="k-egr-d">&nbsp;</div>
         </div>
-        <div class="card kpi">
-          <div class="kpi-top"><span class="kpi-label">Resultado del mes</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-6"/></svg></span></div>
+        <div class="card kpi click" onclick="go('flujo')" title="Ver el resultado mes por mes">
+          <div class="kpi-top"><span class="kpi-label">Resultado del ejercicio</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 4-6"/></svg></span></div>
           <div class="kpi-val tnum" id="k-res">—</div>
           <div class="kpi-delta up" id="k-res-d">&nbsp;</div>
         </div>
-        <div class="card kpi">
-          <div class="kpi-top"><span class="kpi-label">Impuestos estimados</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span></div>
+        <div class="card kpi click" onclick="go('bancos')" title="Ver bancos">
+          <div class="kpi-top"><span class="kpi-label">Bancos</span><span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span></div>
           <div class="kpi-val tnum" id="k-imp">—</div>
           <div class="kpi-delta" id="k-imp-d">&nbsp;</div>
         </div>
@@ -404,10 +478,10 @@
         <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 2 1 3.5 2.5 5S9 21 12 21s4-1.5 4.5-3 2.5-2 2.5-6a7 7 0 00-7-7z"/></svg> ¿Qué necesitas hoy?</h3>
         <p>Accede en un clic a lo que más piden nuestros clientes.</p>
         <div class="qa-row">
-          <button class="qa" onclick="go('fiscal')">Descargar mi e.firma (FIEL)</button>
-          <button class="qa" onclick="go('facturas')">Necesito una factura</button>
+          <button class="qa" onclick="go('fiscal')">Mi e.firma (FIEL)</button>
+          <button class="qa" onclick="abrirSolicitud()">Necesito una factura</button>
           <button class="qa" onclick="go('impuestos')">Revisar mi declaración</button>
-          <button class="qa" onclick="go('impuestos')">¿Cuánto pagué de impuestos?</button>
+          <button class="qa" onclick="go('impuestos');setTimeout(()=>$('imp-acum').scrollIntoView({behavior:'smooth'}),80)">¿Cuánto pagué de impuestos?</button>
           <button class="qa" onclick="go('fiscal')">Mi domicilio ante el SAT</button>
           <button class="qa" onclick="go('impuestos')">¿Cuándo vence mi próximo pago?</button>
         </div>
@@ -416,34 +490,70 @@
 
     <!-- FLUJO -->
     <section class="view" id="flujo">
-      <div class="page-head"><div class="page-title">Ingresos y <em>Egresos</em></div><div class="page-sub">Flujo casi en tiempo real, sincronizado a diario desde ContaLink.</div></div>
+      <div class="page-head"><div class="page-title">Ingresos y <em>Egresos</em></div><div class="page-sub" id="flujo-sub">Cifras contables del ejercicio. Da clic en una tarjeta o en un mes para ver sus facturas.</div></div>
       <div class="grid kpis" style="grid-template-columns:repeat(3,1fr)">
-        <div class="card kpi"><div class="kpi-top"><span class="kpi-label" id="f-ing-l">Ingresos del ejercicio</span></div><div class="kpi-val tnum" id="f-ing">—</div><div class="kpi-delta" id="f-ing-d">&nbsp;</div></div>
-        <div class="card kpi"><div class="kpi-top"><span class="kpi-label" id="f-egr-l">Egresos del ejercicio</span></div><div class="kpi-val tnum" id="f-egr">—</div><div class="kpi-delta" id="f-egr-d">&nbsp;</div></div>
+        <div class="card kpi click" onclick="verFacturas('emitidas','ejercicio')"><div class="kpi-top"><span class="kpi-label" id="f-ing-l">Ingresos del ejercicio</span></div><div class="kpi-val tnum" id="f-ing">—</div><div class="kpi-delta" id="f-ing-d">&nbsp;</div><div class="kpi-go">Ver facturas emitidas →</div></div>
+        <div class="card kpi click" onclick="verFacturas('recibidas','ejercicio')"><div class="kpi-top"><span class="kpi-label" id="f-egr-l">Egresos del ejercicio</span></div><div class="kpi-val tnum" id="f-egr">—</div><div class="kpi-delta" id="f-egr-d">&nbsp;</div><div class="kpi-go">Ver facturas recibidas →</div></div>
         <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Resultado acumulado</span></div><div class="kpi-val tnum" id="f-res">—</div><div class="kpi-delta" id="f-res-d">&nbsp;</div></div>
       </div>
       <div class="card">
-        <div class="card-h"><span class="card-t">Movimientos bancarios recientes</span><span class="pill" id="mov-pill">—</span></div>
+        <div class="card-h"><span class="card-t">Mes por mes</span><span class="pill" id="mes-pill">Contabilidad</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Mes</th><th style="text-align:right">Ingresos</th><th style="text-align:right">Egresos</th><th style="text-align:right">Resultado</th><th style="text-align:right">Facturado (CFDI)</th><th style="text-align:right">Recibido (CFDI)</th></tr></thead>
+          <tbody id="mes-body"></tbody>
+        </table></div>
+      </div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Ingresos, egresos y resultado salen de la contabilidad (balanza). Las columnas de CFDI suman las facturas timbradas del mes, sin cancelar. Si un mes muestra facturas pero no contabilidad, ese mes aún no está contabilizado.</div>
+    </section>
+
+    <!-- BANCOS -->
+    <section class="view" id="bancos">
+      <div class="page-head"><div class="page-title"><em>Bancos</em></div><div class="page-sub">Saldo contable y movimientos registrados en la contabilidad.</div></div>
+      <div class="grid kpis" style="grid-template-columns:repeat(3,1fr)">
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Saldo en bancos</span></div><div class="kpi-val tnum" id="b-saldo">—</div><div class="kpi-delta" id="b-saldo-d">&nbsp;</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Entradas del mes</span></div><div class="kpi-val tnum" id="b-ent">—</div><div class="kpi-delta" id="b-ent-d">&nbsp;</div></div>
+        <div class="card kpi"><div class="kpi-top"><span class="kpi-label">Salidas del mes</span></div><div class="kpi-val tnum" id="b-sal">—</div><div class="kpi-delta" id="b-sal-d">&nbsp;</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">Movimientos bancarios</span><span class="pill" id="mov-pill">—</span></div>
         <div class="tbl-wrap"><table>
           <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Cuenta contable</th><th style="text-align:right">Monto</th><th>CFDI</th></tr></thead>
           <tbody id="mov-body"></tbody>
         </table></div>
       </div>
-      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> Movimientos del auxiliar de bancos en ContaLink. La marca CFDI indica los que ya quedaron ligados a su factura.</div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> El banco todavía no está conectado en línea: el saldo es el contable, a la fecha del último movimiento registrado. La marca CFDI indica los movimientos ya ligados a su factura.</div>
     </section>
 
     <!-- FACTURAS -->
     <section class="view" id="facturas">
-      <div class="page-head"><div class="page-title"><em>Facturas</em></div><div class="page-sub">Todas tus facturas emitidas y recibidas, con descarga de XML y PDF.</div></div>
-      <div class="tabs">
-        <button class="tab active" data-fac="emitidas">Emitidas (<span id="n-emi">—</span>)</button>
-        <button class="tab" data-fac="recibidas">Recibidas (<span id="n-rec">—</span>)</button>
+      <div class="page-head"><div class="page-title"><em>Facturas</em></div><div class="page-sub">Todas tus facturas emitidas y recibidas, con su estado de cobro o pago.</div></div>
+      <div class="fac-head">
+        <div class="tabs">
+          <button class="tab active" data-fac="emitidas">Emitidas (<span id="n-emi">—</span>)</button>
+          <button class="tab" data-fac="recibidas">Recibidas (<span id="n-rec">—</span>)</button>
+        </div>
+        <button class="btn-p" onclick="abrirSolicitud()">+ Solicitar una factura</button>
       </div>
       <div class="card">
+        <div class="filtros">
+          <label>Periodo<select id="ff-per" class="w-m"><option value="todo">Todo</option><option value="ejercicio">Ejercicio actual</option><option value="mes">Mes actual</option><option value="rango">Rango…</option></select></label>
+          <label id="ff-rango-d" hidden>Desde<input type="date" id="ff-desde" class="w-m"></label>
+          <label id="ff-rango-h" hidden>Hasta<input type="date" id="ff-hasta" class="w-m"></label>
+          <label>Folio<input id="ff-folio" class="w-s" placeholder="Serie o folio"></label>
+          <label id="ff-cp-l">Cliente<input id="ff-cp" class="w-l" placeholder="Nombre o RFC"></label>
+          <label>Total mín.<input id="ff-min" class="w-s" type="number" step="0.01"></label>
+          <label>Total máx.<input id="ff-max" class="w-s" type="number" step="0.01"></label>
+          <label>Método<select id="ff-met" class="w-s"><option value="">Todos</option><option>PUE</option><option>PPD</option></select></label>
+          <label id="ff-est-l">Cobro<select id="ff-est" class="w-m"><option value="">Todos</option><option value="pagado">Cobrada</option><option value="pendiente">Pendiente</option></select></label>
+          <label>Estatus<select id="ff-vig" class="w-s"><option value="vigente">Vigentes</option><option value="">Todas</option><option value="cancelada">Canceladas</option></select></label>
+          <button class="btn-s" onclick="limpiaFiltros()">Limpiar</button>
+        </div>
+        <div class="fac-sum" id="fac-sum">&nbsp;</div>
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Fecha</th><th>Folio</th><th>Cliente / Proveedor</th><th style="text-align:right">Total</th><th>Método</th><th style="text-align:right">Cobro / Pago</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Folio</th><th id="th-cp">Cliente</th><th style="text-align:right">Subtotal</th><th style="text-align:right">Total</th><th>Método</th><th style="text-align:right" id="th-cobro">Cobro</th></tr></thead>
           <tbody id="fac-body"></tbody>
         </table></div>
+        <div class="fac-sum" id="fac-mas" style="justify-content:center;border-bottom:none" hidden><button class="btn-s" onclick="FAC.limite+=100;renderFac()">Mostrar más</button></div>
       </div>
     </section>
 
@@ -470,7 +580,7 @@
           <div class="card-b"><div id="conc-list"></div></div>
         </div>
         <div class="card">
-          <div class="card-h"><span class="card-t">Acumulado del ejercicio</span></div>
+          <div class="card-h"><span class="card-t" id="imp-acum">Acumulado del ejercicio</span></div>
           <div class="card-b">
             <div style="display:flex;align-items:baseline;gap:8px"><span class="kpi-val tnum" style="font-size:32px" id="t-tot">—</span><span style="color:var(--muted);font-size:13px">MXN</span></div>
             <div style="margin-top:15px;display:flex;flex-direction:column;gap:10px">
@@ -487,7 +597,24 @@
     <section class="view" id="documentos">
       <div class="page-head"><div class="page-title">Expediente <em>Fiscal</em></div><div class="page-sub">Tu papeleo contable-fiscal, ordenado y descargable.</div></div>
       <div class="grid doc-grid" id="doc-grid"></div>
-      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> <span id="doc-nota">El expediente en Drive todavía no está conectado al portal. Los conteos de abajo salen de lo que ya vive en Supabase.</span></div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> <span id="doc-nota">Da clic en una tarjeta para abrir el detalle. Los documentos de tu carpeta (constancias, acuses, opiniones de cumplimiento) se conectarán aquí próximamente.</span></div>
+    </section>
+
+    <!-- BALANZA -->
+    <section class="view" id="balanza">
+      <div class="page-head"><div class="page-title">Balanza de <em>comprobación</em></div><div class="page-sub">Saldos por cuenta, mes por mes, tal como están en la contabilidad.</div></div>
+      <div class="card">
+        <div class="filtros">
+          <label>Periodo<select id="bz-per" class="w-m"></select></label>
+          <label>Nivel<select id="bz-niv" class="w-s"><option value="1">Mayor</option><option value="">Todas</option></select></label>
+          <label>Buscar cuenta<input id="bz-q" class="w-l" placeholder="Número o nombre"></label>
+          <button class="btn-s" onclick="descargaBalanza()">Descargar CSV</button>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Cuenta</th><th>Nombre</th><th style="text-align:right">Saldo inicial</th><th style="text-align:right">Debe</th><th style="text-align:right">Haber</th><th style="text-align:right">Saldo final</th></tr></thead>
+          <tbody id="bz-body"></tbody>
+        </table></div>
+      </div>
     </section>
 
     <!-- DATOS SAT -->
@@ -642,59 +769,64 @@ async function cargaCliente(c){
     $('sync').classList.toggle('stale', dias > 2);
   } else { $('sync-txt').textContent = 'Sin sincronizar'; $('sync').classList.add('stale'); }
 
-  $('resumen-sub').textContent = c.periodo_balanza
-    ? 'Cifras contables al cierre de ' + periodoLargo(c.periodo_balanza) + '.'
-    : 'Todavía no hay contabilidad cargada para esta empresa.';
+  $('resumen-sub').textContent = c.periodo_balanza ? ' ' : 'Todavía no hay contabilidad cargada para esta empresa.';
 
   pintaResumen(c);
   await Promise.all([ cargaER(c), cargaFlujo(c), cargaFacturas(c), cargaImpuestos(c),
-                      cargaConciliacion(c), cargaFrescura(c), cargaSAT(c), cargaHistorial(c) ]);
+                      cargaConciliacion(c), cargaFrescura(c), cargaSAT(c), cargaHistorial(c), cargaBalanza(c) ]);
+  renderMeses();
 }
 
 /* ---------- RESUMEN ---------- */
 function pintaResumen(c){
-  const ing = N(c.ingresos_mes), egr = (N(c.gastos_mes) || 0), res = N(c.utilidad_mes);
-  $('k-ing').textContent = K(ing);
-  $('k-egr').textContent = K(egr);
-  $('k-res').textContent = K(res);
-  $('k-res-d').textContent = c.margen_pct_acum !== null && c.margen_pct_acum !== undefined
-    ? 'Margen acumulado ' + Number(c.margen_pct_acum).toFixed(1) + '%' : '';
-  $('k-res-d').className = 'kpi-delta ' + (res >= 0 ? 'up' : 'down');
-  const sinPolizas = (!ing && !egr);
-  $('k-ing-d').textContent = sinPolizas ? 'Sin pólizas en el mes' : 'Acumulado ' + K(N(c.ingresos_acum));
-  $('k-egr-d').textContent = sinPolizas ? 'Sin pólizas en el mes' : 'Acumulado ' + K(N(c.gastos_acum));
+  ['k-ing','k-egr','k-res'].forEach(id => $(id).textContent = '—');
+  ['k-ing-d','k-egr-d','k-res-d'].forEach(id => $(id).textContent = '');
   $('k-imp').textContent = K(N(c.bancos));
-  $('k-imp-d').textContent = 'Saldo en bancos';
-  document.querySelector('#resumen .kpi-label').textContent = 'Ingresos del mes';
-  const lbls = document.querySelectorAll('#resumen .kpi-label');
-  if (lbls[3]) lbls[3].textContent = 'Bancos';
+  $('k-imp-d').textContent = c.periodo_balanza ? 'Saldo contable · ' + periodoLargo(c.periodo_balanza) : 'Sin balanza cargada';
+  $('k-imp-d').className = 'kpi-delta';
 }
 
-/* ---------- Estado de resultados + gráfica ---------- */
+/* ---------- Estado de resultados (ejercicio) ---------- */
+let ER = [];
+function normalizaER(rows){
+  // un renglón por mes: si hay periodo día 01 se usa ése; si no, el último del mes
+  const porMes = {};
+  rows.forEach(r => { const m = String(r.periodo).slice(0,7);
+    const prev = porMes[m];
+    if (!prev || String(r.periodo).slice(8,10) === '01') porMes[m] = r; });
+  return Object.keys(porMes).sort().map(m => porMes[m]);
+}
 async function cargaER(c){
   const { data } = await DB.from('v_portal_estado_resultados')
-    .select('periodo,ingresos_mes,gastos_mes,financieros_mes,ingresos_acum,gastos_acum,financieros_acum,utilidad_acum,margen_pct_acum')
+    .select('periodo,ingresos_mes,gastos_mes,costos_mes,financieros_mes,ingresos_acum,gastos_acum,costos_acum,financieros_acum,utilidad_acum,utilidad_mes,margen_pct_acum')
     .eq('client_id', c.client_id).order('periodo');
-  const rows = data || [];
-  const ult = rows[rows.length - 1];
+  ER = normalizaER(data || []);
+  const conMov = ER.filter(r => N(r.ingresos_mes) || N(r.gastos_mes) || N(r.costos_mes));
+  const ult = conMov[conMov.length - 1];
+  const egrAcum = r => (N(r.gastos_acum)||0) + (N(r.costos_acum)||0) + (N(r.financieros_acum)||0);
+  const egrMes  = r => (N(r.gastos_mes)||0) + (N(r.costos_mes)||0) + (N(r.financieros_mes)||0);
   if (ult) {
-    $('f-ing').textContent = K(N(ult.ingresos_acum));
-    $('f-egr').textContent = K((N(ult.gastos_acum)||0) + (N(ult.financieros_acum)||0));
-    $('f-res').textContent = K(N(ult.utilidad_acum));
-    $('f-res-d').textContent = ult.margen_pct_acum !== null ? 'Margen ' + Number(ult.margen_pct_acum).toFixed(1) + '%' : '';
-    $('f-res-d').className = 'kpi-delta ' + (N(ult.utilidad_acum) >= 0 ? 'up' : 'down');
-    $('f-ing-d').textContent = 'Al cierre de ' + periodoLargo(ult.periodo);
-    $('f-egr-d').textContent = 'Incluye gastos financieros';
+    const al = 'Al cierre de ' + periodoLargo(ult.periodo);
+    $('k-ing').textContent = $('f-ing').textContent = K(N(ult.ingresos_acum));
+    $('k-egr').textContent = $('f-egr').textContent = K(egrAcum(ult));
+    $('k-res').textContent = $('f-res').textContent = K(N(ult.utilidad_acum));
+    $('k-ing-d').textContent = $('f-ing-d').textContent = al;
+    $('k-egr-d').textContent = $('f-egr-d').textContent = al;
+    const mg = ult.margen_pct_acum !== null && ult.margen_pct_acum !== undefined ? 'Margen ' + Number(ult.margen_pct_acum).toFixed(1) + '% · ' : '';
+    $('k-res-d').textContent = $('f-res-d').textContent = mg + al;
+    ['k-res-d','f-res-d'].forEach(id => $(id).className = 'kpi-delta ' + (N(ult.utilidad_acum) >= 0 ? 'up' : 'down'));
+    ['k-ing-d','k-egr-d','f-ing-d','f-egr-d'].forEach(id => $(id).className = 'kpi-delta');
+    $('resumen-sub').textContent = 'Cifras contables del ejercicio ' + String(ult.periodo).slice(0,4) +
+      ', al cierre de ' + periodoLargo(ult.periodo) + ' (último mes contabilizado).';
+  } else {
+    ['k-ing-d','k-egr-d','k-res-d','f-ing-d','f-egr-d','f-res-d'].forEach(id => $(id).textContent = 'Sin meses contabilizados');
   }
-  const conMov = rows.filter(r => N(r.ingresos_mes) || N(r.gastos_mes));
   const chart = $('chart');
+  chart.parentNode.querySelectorAll('.empty.extra').forEach(e => e.remove());
   if (!conMov.length) {
     chart.innerHTML = '<div class="empty">Todavía no hay meses con pólizas registradas.<br>La gráfica aparece en cuanto se contabilice el primer mes.</div>';
   } else {
-    const serie = conMov.slice(-6).map(r => ({
-      m: MES[+String(r.periodo).slice(5,7) - 1],
-      inc: N(r.ingresos_mes) || 0,
-      egr: (N(r.gastos_mes)||0) + (N(r.financieros_mes)||0) }));
+    const serie = conMov.slice(-6).map(r => ({ m: MES[+String(r.periodo).slice(5,7) - 1], inc: N(r.ingresos_mes) || 0, egr: egrMes(r) }));
     const max = Math.max(...serie.flatMap(d => [d.inc, d.egr])) || 1;
     chart.innerHTML = serie.map(d =>
       '<div class="bargroup"><div class="bars">' +
@@ -702,23 +834,58 @@ async function cargaER(c){
       '<div class="bar egr" style="height:0" data-h="' + (d.egr/max*100) + '" title="Egresos ' + MXN(d.egr) + '"></div>' +
       '</div><div class="bar-x">' + d.m + '</div></div>').join('');
     setTimeout(() => document.querySelectorAll('.bar').forEach(b => b.style.height = b.dataset.h + '%'), 120);
-    if (serie.length < 3) chart.insertAdjacentHTML('afterend',
-      '<div class="empty" style="padding-top:4px">Solo hay ' + serie.length + ' mes con pólizas contabilizadas. ' +
-      'La comparativa se vuelve útil cuando haya al menos tres.</div>');
   }
 }
 
-/* ---------- Movimientos bancarios ---------- */
+/* ---------- Mes por mes (contabilidad + CFDI) ---------- */
+function renderMeses(){
+  const b = $('mes-body'), anio = String(new Date().getFullYear());
+  const ultER = ER.length ? String(ER[ER.length-1].periodo).slice(0,4) : anio;
+  const ej = ultER > anio ? ultER : anio;
+  const meses = {};
+  ER.filter(r => String(r.periodo).slice(0,4) === ej).forEach(r => { meses[String(r.periodo).slice(0,7)] = { er: r, fe: 0, fr: 0 }; });
+  const vig = r => !esCancelada(r);
+  FAC.emitidas.filter(vig).forEach(r => { const m = String(r.fecha).slice(0,7); if (m.slice(0,4) !== ej) return; (meses[m] = meses[m] || {fe:0,fr:0}).fe += N(r.total) || 0; });
+  FAC.recibidas.filter(vig).forEach(r => { const m = String(r.fecha).slice(0,7); if (m.slice(0,4) !== ej) return; (meses[m] = meses[m] || {fe:0,fr:0}).fr += N(r.total) || 0; });
+  const keys = Object.keys(meses).sort().reverse();
+  $('mes-pill').textContent = 'Ejercicio ' + ej;
+  if (!keys.length) { vacio(b, 'Sin información del ejercicio.'); return; }
+  b.innerHTML = keys.map(m => {
+    const x = meses[m], r = x.er;
+    const ing = r ? N(r.ingresos_mes) : null;
+    const egr = r ? (N(r.gastos_mes)||0) + (N(r.costos_mes)||0) + (N(r.financieros_mes)||0) : null;
+    const sinCont = !r || (!ing && !egr);
+    const res = sinCont ? null : (N(r.utilidad_mes) !== null ? N(r.utilidad_mes) : (ing||0) - (egr||0));
+    return '<tr class="tr-click" onclick="verFacturas(\'emitidas\',\'' + m + '\')" title="Ver facturas de ' + periodoLargo(m + '-01') + '">' +
+      '<td class="t-strong">' + periodoLargo(m + '-01') + '</td>' +
+      '<td style="text-align:right" class="money">' + (sinCont ? '<span class="badge b-gray">Sin contabilizar</span>' : MXN(ing)) + '</td>' +
+      '<td style="text-align:right" class="money">' + (sinCont ? '—' : MXN(egr)) + '</td>' +
+      '<td style="text-align:right;color:' + (res < 0 ? 'var(--neg)' : 'inherit') + '" class="money">' + (res === null ? '—' : MXN(res)) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(x.fe) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(x.fr) + '</td></tr>';
+  }).join('');
+}
+
+/* ---------- Bancos ---------- */
 async function cargaFlujo(c){
   const { data } = await DB.from('movimientos')
     .select('fecha,descripcion,cargo,abono,cuenta_contable,tercero,cfdi_id')
-    .eq('client_id', c.client_id).order('fecha', {ascending:false}).limit(25);
+    .eq('client_id', c.client_id).order('fecha', {ascending:false}).limit(300);
   const b = $('mov-body'), rows = data || [];
-  if (!rows.length) { vacio(b, 'Sin movimientos bancarios cargados.'); $('mov-pill').textContent = '—'; return; }
+  const ultMov = rows.length ? rows[0].fecha : null;
+  const asOf = ultMov ? 'Saldo contable al ' + fecha(ultMov) : (c.periodo_balanza ? 'Saldo contable · ' + periodoLargo(c.periodo_balanza) : 'Sin balanza cargada');
+  $('b-saldo').textContent = K(N(c.bancos)); $('b-saldo-d').textContent = asOf;
+  $('k-imp-d').textContent = asOf;
+  if (!rows.length) { vacio(b, 'Sin movimientos bancarios cargados.'); $('mov-pill').textContent = '—';
+    ['b-ent','b-sal'].forEach(id => $(id).textContent = '—'); ['b-ent-d','b-sal-d'].forEach(id => $(id).textContent = ''); return; }
+  const mUlt = String(ultMov).slice(0,7), delMes = rows.filter(r => String(r.fecha).slice(0,7) === mUlt);
+  $('b-ent').textContent = K(delMes.reduce((a,r) => a + (N(r.abono)||0), 0));
+  $('b-sal').textContent = K(delMes.reduce((a,r) => a + (N(r.cargo)||0), 0));
+  $('b-ent-d').textContent = $('b-sal-d').textContent = periodoLargo(mUlt + '-01') + ' · ' + delMes.length + ' movimientos';
   $('mov-pill').textContent = 'Últimos ' + rows.length;
   b.innerHTML = rows.map(r => {
     const entra = N(r.abono) > 0, monto = entra ? N(r.abono) : -(N(r.cargo) || 0);
-    return '<tr><td class="tnum">' + fechaCorta(r.fecha) + '</td>' +
+    return '<tr><td class="tnum">' + fecha(r.fecha) + '</td>' +
       '<td class="t-strong">' + esc(r.descripcion || r.tercero || '—') + '</td>' +
       '<td><span class="badge ' + (entra ? 'b-ok' : 'b-red') + '">' + (entra ? 'Entrada' : 'Salida') + '</span></td>' +
       '<td>' + esc(r.cuenta_contable || '—') + '</td>' +
@@ -729,37 +896,95 @@ async function cargaFlujo(c){
 }
 
 /* ---------- Facturas ---------- */
-let FAC = { emitidas: [], recibidas: [] };
+let FAC = { emitidas: [], recibidas: [], cual: 'emitidas', limite: 100 };
+const esCancelada = r => /cancel/i.test(r.estatus || '');
 async function cargaFacturas(c){
+  const cols = 'fecha,folio,serie,uuid_cfdi,contraparte_nombre,contraparte_rfc,subtotal,total,moneda,metodo_pago,forma_pago,estatus,pagado,fecha_pago,importe_pendiente';
   const [em, re] = await Promise.all([
-    DB.from('cfdi').select('fecha,folio,serie,contraparte_nombre,contraparte_rfc,total,metodo_pago,pagado,fecha_pago,importe_pendiente')
-      .eq('client_id', c.client_id).eq('tipo','emitido').order('fecha',{ascending:false}).limit(200),
-    DB.from('cfdi').select('fecha,folio,serie,contraparte_nombre,contraparte_rfc,total,metodo_pago,pagado,fecha_pago,importe_pendiente')
-      .eq('client_id', c.client_id).eq('tipo','recibido').order('fecha',{ascending:false}).limit(200)
+    DB.from('cfdi').select(cols).eq('client_id', c.client_id).eq('tipo','emitido').order('fecha',{ascending:false}).limit(3000),
+    DB.from('cfdi').select(cols).eq('client_id', c.client_id).eq('tipo','recibido').order('fecha',{ascending:false}).limit(3000)
   ]);
   FAC.emitidas = em.data || []; FAC.recibidas = re.data || [];
-  $('n-emi').textContent = FAC.emitidas.length;
-  $('n-rec').textContent = FAC.recibidas.length;
-  renderFac('emitidas');
+  $('n-emi').textContent = FAC.emitidas.filter(r => !esCancelada(r)).length;
+  $('n-rec').textContent = FAC.recibidas.filter(r => !esCancelada(r)).length;
+  renderFac();
+}
+function filtraFac(rows){
+  const per = $('ff-per').value, hoy = new Date();
+  const anio = String(hoy.getFullYear()), mes = anio + '-' + String(hoy.getMonth()+1).padStart(2,'0');
+  const folio = $('ff-folio').value.trim().toLowerCase(), cp = $('ff-cp').value.trim().toLowerCase();
+  const mn = N($('ff-min').value), mx = N($('ff-max').value), met = $('ff-met').value, est = $('ff-est').value, vig = $('ff-vig').value;
+  const d = $('ff-desde').value, h = $('ff-hasta').value;
+  return rows.filter(r => {
+    const f = String(r.fecha).slice(0,10);
+    if (per === 'ejercicio' && f.slice(0,4) !== anio) return false;
+    if (per === 'mes' && f.slice(0,7) !== mes) return false;
+    if (per === 'rango' && ((d && f < d) || (h && f > h))) return false;
+    if (/^\d{4}-\d{2}$/.test(per) && f.slice(0,7) !== per) return false;
+    if (folio && ![r.serie, r.folio, r.uuid_cfdi].join(' ').toLowerCase().includes(folio)) return false;
+    if (cp && ![r.contraparte_nombre, r.contraparte_rfc].join(' ').toLowerCase().includes(cp)) return false;
+    if (mn !== null && (N(r.total)||0) < mn) return false;
+    if (mx !== null && (N(r.total)||0) > mx) return false;
+    if (met && r.metodo_pago !== met) return false;
+    if (est === 'pagado' && !r.pagado) return false;
+    if (est === 'pendiente' && r.pagado) return false;
+    if (vig === 'vigente' && esCancelada(r)) return false;
+    if (vig === 'cancelada' && !esCancelada(r)) return false;
+    return true;
+  });
 }
 function renderFac(cual){
-  const rows = FAC[cual], b = $('fac-body');
-  if (!rows.length) { vacio(b, 'Sin facturas ' + cual + '.'); return; }
-  b.innerHTML = rows.slice(0,60).map(r =>
-    '<tr><td class="tnum">' + fecha(r.fecha) + '</td>' +
-    '<td class="t-strong tnum">' + esc([r.serie, r.folio].filter(Boolean).join('-') || '—') + '</td>' +
-    '<td>' + esc(r.contraparte_nombre || r.contraparte_rfc || '—') + '</td>' +
-    '<td style="text-align:right" class="money">' + MXN(N(r.total)) + '</td>' +
-    '<td><span class="badge ' + (r.metodo_pago === 'PUE' ? 'b-green' : 'b-gray') + '">' + esc(r.metodo_pago || '—') + '</span></td>' +
-    '<td style="text-align:right">' + (r.pagado
-        ? '<span class="badge b-ok">' + (r.fecha_pago ? fechaCorta(r.fecha_pago) : 'Liquidada') + '</span>'
-        : '<span class="badge b-warn">Pendiente ' + MXN(N(r.importe_pendiente) || N(r.total)) + '</span>') + '</td></tr>').join('');
+  if (cual) { FAC.cual = cual; FAC.limite = 100; }
+  const emi = FAC.cual === 'emitidas';
+  $('th-cp').textContent = emi ? 'Cliente' : 'Proveedor';
+  $('th-cobro').textContent = emi ? 'Cobro' : 'Pago';
+  $('ff-cp-l').firstChild.textContent = emi ? 'Cliente' : 'Proveedor';
+  $('ff-est-l').firstChild.textContent = emi ? 'Cobro' : 'Pago';
+  $('ff-est').options[1].textContent = emi ? 'Cobrada' : 'Pagada';
+  document.querySelectorAll('.tab[data-fac]').forEach(x => x.classList.toggle('active', x.dataset.fac === FAC.cual));
+  const rows = filtraFac(FAC[FAC.cual]), b = $('fac-body');
+  const tot = rows.reduce((a,r) => a + (N(r.total)||0), 0);
+  const pend = rows.filter(r => !r.pagado && !esCancelada(r)).reduce((a,r) => a + (N(r.importe_pendiente) || N(r.total) || 0), 0);
+  $('fac-sum').innerHTML = '<span><b>' + rows.length.toLocaleString('es-MX') + '</b> facturas</span><span>Total <b>' + MXN(tot) + '</b></span>' +
+    '<span>' + (emi ? 'Por cobrar' : 'Por pagar') + ' <b>' + MXN(pend) + '</b></span>';
+  $('fac-mas').hidden = rows.length <= FAC.limite;
+  if (!rows.length) { vacio(b, 'No hay facturas ' + FAC.cual + ' con esos filtros.'); return; }
+  b.innerHTML = rows.slice(0, FAC.limite).map(r => {
+    const canc = esCancelada(r);
+    const estado = canc ? '<span class="badge b-gray">Cancelada</span>'
+      : r.pagado ? '<span class="badge b-ok">' + (emi ? 'Cobrada' : 'Pagada') + (r.fecha_pago ? ' ' + fechaCorta(r.fecha_pago) : '') + '</span>'
+      : '<span class="badge b-warn">Pendiente ' + MXN(N(r.importe_pendiente) || N(r.total)) + '</span>';
+    return '<tr' + (canc ? ' style="opacity:.55"' : '') + '><td class="tnum">' + fecha(r.fecha) + '</td>' +
+      '<td class="t-strong tnum">' + esc([r.serie, r.folio].filter(Boolean).join('-') || (r.uuid_cfdi ? r.uuid_cfdi.slice(0,8) : '—')) + '</td>' +
+      '<td>' + esc(r.contraparte_nombre || r.contraparte_rfc || '—') + (r.contraparte_rfc && r.contraparte_nombre ? '<div style="font-size:11px;color:var(--faint)">' + esc(r.contraparte_rfc) + '</div>' : '') + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(N(r.subtotal)) + '</td>' +
+      '<td style="text-align:right" class="money">' + MXN(N(r.total)) + (r.moneda && r.moneda !== 'MXN' ? ' <small>' + esc(r.moneda) + '</small>' : '') + '</td>' +
+      '<td><span class="badge ' + (r.metodo_pago === 'PUE' ? 'b-green' : 'b-gray') + '">' + esc(r.metodo_pago || '—') + '</span></td>' +
+      '<td style="text-align:right">' + estado + '</td></tr>';
+  }).join('');
 }
-document.querySelectorAll('.tab[data-fac]').forEach(t => t.addEventListener('click', () => {
-  document.querySelectorAll('.tab[data-fac]').forEach(x => x.classList.remove('active'));
-  t.classList.add('active');
-  renderFac(t.dataset.fac === 'emitidas' ? 'emitidas' : 'recibidas');
-}));
+function limpiaFiltros(){
+  ['ff-folio','ff-cp','ff-min','ff-max','ff-desde','ff-hasta'].forEach(id => $(id).value = '');
+  $('ff-per').value = 'todo'; $('ff-met').value = ''; $('ff-est').value = ''; $('ff-vig').value = 'vigente';
+  $('ff-rango-d').hidden = $('ff-rango-h').hidden = true;
+  renderFac();
+}
+function verFacturas(cual, periodo){
+  limpiaFiltros();
+  const sel = $('ff-per');
+  if (/^\d{4}-\d{2}$/.test(periodo)) {
+    if (![...sel.options].some(o => o.value === periodo)) sel.add(new Option(periodoLargo(periodo + '-01'), periodo));
+    sel.value = periodo;
+  } else if (periodo) sel.value = periodo;
+  renderFac(cual);
+  go('facturas');
+}
+window.verFacturas = verFacturas; window.limpiaFiltros = limpiaFiltros; window.renderFac = renderFac;
+document.querySelectorAll('.tab[data-fac]').forEach(t => t.addEventListener('click', () => renderFac(t.dataset.fac)));
+['ff-folio','ff-cp','ff-min','ff-max','ff-desde','ff-hasta'].forEach(id => $(id).addEventListener('input', () => { FAC.limite = 100; renderFac(); }));
+['ff-met','ff-est','ff-vig'].forEach(id => $(id).addEventListener('change', () => { FAC.limite = 100; renderFac(); }));
+$('ff-per').addEventListener('change', () => { const r = $('ff-per').value === 'rango';
+  $('ff-rango-d').hidden = $('ff-rango-h').hidden = !r; FAC.limite = 100; renderFac(); });
 
 /* ---------- Impuestos ---------- */
 async function cargaImpuestos(c){
@@ -773,6 +998,7 @@ async function cargaImpuestos(c){
     const ret = (N(r.ret_isr)||0) + (N(r.ret_iva)||0) || N(r.retenciones) || 0;
     const tot = N(r.importe_total);
     const est = r.pagada ? ['b-ok','Pagada'] : r.presentada ? ['b-ok','Presentada']
+      : r.base_calculo === 'cfdi_previo' ? ['b-gray','Sin acuse cargado']
       : (tot && tot > 0) ? ['b-warn','Por presentar'] : ['b-gray','Sin saldo'];
     return '<tr><td class="t-strong">' + periodoLargo(r.periodo) + '</td>' +
       '<td style="text-align:right" class="money">' + MXN(N(r.isr)) + '</td>' +
@@ -790,13 +1016,18 @@ async function cargaImpuestos(c){
   $('t-tot').textContent = K(sum('importe_total'));
 
   const hoy = new Date().toISOString().slice(0,10);
-  const prox = rows.filter(r => r.fecha_limite && r.fecha_limite >= hoy && !r.pagada)
-                   .sort((a,b) => a.fecha_limite < b.fecha_limite ? -1 : 1)[0];
+  // fecha límite: la registrada o, si no hay, el día 17 del mes siguiente al periodo
+  rows.forEach(r => { if (!r.fecha_limite && r.periodo) { const d = new Date(String(r.periodo).slice(0,7) + '-01T12:00:00');
+    d.setMonth(d.getMonth() + 1); r.fecha_limite = d.toISOString().slice(0,8) + '17'; } });
+  let prox = rows.filter(r => r.fecha_limite >= hoy && !r.pagada).sort((a,b) => a.fecha_limite < b.fecha_limite ? -1 : 1)[0];
+  if (!prox) { const d = new Date(); const per = new Date(d.getFullYear(), d.getMonth() - (d.getDate() > 17 ? 0 : 1), 1);
+    const lim = new Date(per.getFullYear(), per.getMonth() + 1, 17);
+    prox = { periodo: per.toISOString().slice(0,10), fecha_limite: lim.toISOString().slice(0,10), isr:null, iva_causado:null, importe_total:null }; }
   if (prox) {
     const dias = Math.max(0, Math.ceil((new Date(prox.fecha_limite) - new Date(hoy)) / 86400000));
-    const txt = 'Declaración mensual ' + periodoLargo(prox.periodo) + ' — por presentar';
-    const sub = 'Vence el <b style="color:var(--green-br)">' + fecha(prox.fecha_limite) + '</b> · ISR ' +
-                MXN(N(prox.isr)) + ' · IVA ' + MXN(N(prox.iva_causado)) + ' · Total ' + MXN(N(prox.importe_total));
+    const txt = 'Declaración mensual de ' + periodoLargo(prox.periodo);
+    const sub = 'Vence el <b style="color:var(--green-br)">' + fecha(prox.fecha_limite) + '</b>' +
+      (N(prox.importe_total) !== null ? ' · Estimado: ISR ' + MXN(N(prox.isr)) + ' · IVA ' + MXN(N(prox.iva_causado)) + ' · Total ' + MXN(N(prox.importe_total)) : ' · El importe se confirma al cerrar el mes.');
     ['', '2'].forEach(sfx => {
       const box = $('dl' + sfx + '-box'); if (!box) return;
       box.hidden = false;
@@ -856,12 +1087,100 @@ async function cargaFrescura(c){
       (verde ? 'Al día' : r.semaforo === 'sin_datos' ? 'Sin datos' : 'Atrasado') + '</span></div>';
   }).join('');
 
+  const DESTINO = { balanza:"go('balanza')", cfdi:"verFacturas('emitidas','todo')", antiguedad_saldos:"verFacturas('emitidas','todo');$('ff-est').value='pendiente';renderFac()",
+    movimientos:"go('bancos')", impuestos:"go('impuestos')" };
   const docs = rows.map(r => ['<path d="M4 2h11l5 5v15H4z"/><path d="M14 2v6h6"/>',
-    esc(NOMBRE_FUENTE[r.fuente] || r.fuente), (r.filas || 0).toLocaleString('es-MX') + ' registros en el portal']);
+    esc(NOMBRE_FUENTE[r.fuente] || r.fuente), (r.filas || 0).toLocaleString('es-MX') + ' registros · ver →', DESTINO[r.fuente] || '']);
   $('doc-grid').innerHTML = docs.map(d =>
-    '<div class="card doc-card"><div class="doc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<div class="card doc-card" onclick="' + d[3] + '"><div class="doc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
     d[0] + '</svg></div><div class="doc-t">' + d[1] + '</div><div class="doc-d">' + d[2] + '</div></div>').join('');
 }
+
+/* ---------- Balanza ---------- */
+let BZ = [];
+async function cargaBalanza(c){
+  const { data } = await DB.from('v_portal_balanza_mayor')
+    .select('periodo,no_cuenta,nombre_cuenta,nivel,saldo_inicial,debe,haber,saldo_final')
+    .eq('client_id', c.client_id).order('periodo', {ascending:false}).limit(5000);
+  BZ = data || [];
+  const pers = [...new Set(BZ.map(r => String(r.periodo).slice(0,10)))];
+  $('bz-per').innerHTML = pers.map(p => '<option value="' + p + '">' + periodoLargo(p) + (p.slice(8,10) !== '01' ? ' (' + p.slice(8,10) + ')' : '') + '</option>').join('');
+  renderBalanza();
+}
+function filasBalanza(){
+  const per = $('bz-per').value, niv = $('bz-niv').value, q = $('bz-q').value.trim().toLowerCase();
+  return BZ.filter(r => String(r.periodo).slice(0,10) === per && (!niv || String(r.nivel || 1) === niv) &&
+    (!q || (String(r.no_cuenta) + ' ' + (r.nombre_cuenta || '')).toLowerCase().includes(q)))
+    .sort((a,b) => String(a.no_cuenta).localeCompare(String(b.no_cuenta), 'es', {numeric:true}));
+}
+function renderBalanza(){
+  const b = $('bz-body'), rows = filasBalanza();
+  if (!rows.length) { vacio(b, BZ.length ? 'Sin cuentas con esos filtros.' : 'Sin balanza cargada.'); return; }
+  const td = v => '<td style="text-align:right" class="money">' + MXN(N(v)) + '</td>';
+  b.innerHTML = rows.map(r => '<tr><td class="tnum t-strong">' + esc(r.no_cuenta) + '</td><td>' + esc(r.nombre_cuenta || '') + '</td>' +
+    td(r.saldo_inicial) + td(r.debe) + td(r.haber) + td(r.saldo_final) + '</tr>').join('') +
+    '<tr><td></td><td class="t-strong">Sumas</td><td></td>' + td(rows.reduce((a,r)=>a+(N(r.debe)||0),0)) + td(rows.reduce((a,r)=>a+(N(r.haber)||0),0)) + '<td></td></tr>';
+}
+function descargaBalanza(){
+  const rows = filasBalanza(), sep = ',';
+  const csv = ['Cuenta,Nombre,Saldo inicial,Debe,Haber,Saldo final'].concat(rows.map(r =>
+    [r.no_cuenta, '"' + String(r.nombre_cuenta || '').replace(/"/g,'""') + '"', r.saldo_inicial, r.debe, r.haber, r.saldo_final].join(sep))).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], {type:'text/csv'}));
+  a.download = 'Balanza_' + (ACTUAL && ACTUAL.rfc || '') + '_' + $('bz-per').value.slice(0,7) + '.csv'; a.click();
+}
+window.descargaBalanza = descargaBalanza;
+['bz-per','bz-niv'].forEach(id => $(id).addEventListener('change', renderBalanza));
+$('bz-q').addEventListener('input', renderBalanza);
+
+/* ---------- Solicitud de factura ---------- */
+function agregaConcepto(){
+  const d = document.createElement('div'); d.className = 'con-row';
+  d.innerHTML = '<label>Descripción<input class="c-desc" required placeholder="Ej. Servicios de consultoría noviembre"></label>' +
+    '<label>Cantidad<input class="c-cant" type="number" min="0" step="any" value="1" required></label>' +
+    '<label>Precio unitario (sin IVA)<input class="c-pu" type="number" min="0" step="0.01" required></label>' +
+    '<label>Clave SAT (opcional)<input class="c-clave" placeholder="80111600"></label>' +
+    '<label>Unidad<select class="c-uni"><option value="E48">E48 Servicio</option><option value="H87">H87 Pieza</option><option value="ACT">ACT Actividad</option><option value="HUR">HUR Hora</option></select></label>' +
+    '<button type="button" class="btn-s" title="Quitar" onclick="this.parentNode.remove();totalSolicitud()">×</button>';
+  $('s-conceptos').appendChild(d);
+  d.querySelectorAll('input').forEach(i => i.addEventListener('input', totalSolicitud));
+}
+function totalSolicitud(){
+  const sub = [...document.querySelectorAll('#s-conceptos .con-row')].reduce((a,r) =>
+    a + (N(r.querySelector('.c-cant').value)||0) * (N(r.querySelector('.c-pu').value)||0), 0);
+  const iva = Math.round(sub * Number($('s-iva').value) * 100) / 100;
+  $('s-tot').innerHTML = 'Subtotal <b>' + MXN(sub) + '</b> · IVA <b>' + MXN(iva) + '</b> · Total <b>' + MXN(sub + iva) + '</b>';
+  return { sub, iva, tot: Math.round((sub + iva) * 100) / 100 };
+}
+function abrirSolicitud(){
+  $('sol-form').reset(); $('s-conceptos').innerHTML = ''; agregaConcepto(); totalSolicitud();
+  $('s-msg').textContent = ''; $('s-btn').disabled = false; $('sol-modal').hidden = false;
+}
+function cierraSolicitud(){ $('sol-modal').hidden = true; }
+async function enviaSolicitud(e){
+  e.preventDefault();
+  const t = totalSolicitud();
+  const conceptos = [...document.querySelectorAll('#s-conceptos .con-row')].map(r => ({
+    descripcion: r.querySelector('.c-desc').value.trim(), cantidad: N(r.querySelector('.c-cant').value),
+    valor_unitario: N(r.querySelector('.c-pu').value), clave_prod_serv: r.querySelector('.c-clave').value.trim() || null,
+    clave_unidad: r.querySelector('.c-uni').value }));
+  if (!conceptos.length) { $('s-msg').textContent = 'Agrega al menos un concepto.'; return false; }
+  const reg = { client_id: ACTUAL.client_id, receptor_rfc: $('s-rfc').value.trim().toUpperCase(), receptor_nombre: $('s-nom').value.trim(),
+    receptor_cp: $('s-cp').value.trim(), receptor_regimen: $('s-reg').value, uso_cfdi: $('s-uso').value, metodo_pago: $('s-met').value,
+    forma_pago: $('s-met').value === 'PPD' ? '99' : $('s-forma').value, moneda: $('s-mon').value, conceptos,
+    subtotal: t.sub, iva: t.iva, total: t.tot, correo_envio: $('s-mail').value.trim() || null, notas: $('s-notas').value.trim() || null };
+  if (!/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(reg.receptor_rfc)) { $('s-msg').innerHTML = '<span style="color:var(--neg)">Revisa el RFC.</span>'; return false; }
+  $('s-btn').disabled = true; $('s-msg').textContent = 'Enviando…';
+  if (DEMO) { $('s-msg').innerHTML = '<span style="color:var(--green-d)">Demostración: la solicitud no se envía.</span>'; return false; }
+  const { error } = await sb.from('solicitudes_factura').insert(reg);
+  if (error) { $('s-btn').disabled = false; $('s-msg').innerHTML = '<span style="color:var(--neg)">No se pudo enviar: ' + esc(error.message) + '</span>'; return false; }
+  $('s-msg').innerHTML = '<span style="color:var(--green-d)">Listo. Tu contador la emite y te avisa.</span>';
+  setTimeout(cierraSolicitud, 1800);
+  return false;
+}
+Object.assign(window, { agregaConcepto, totalSolicitud, abrirSolicitud, cierraSolicitud, enviaSolicitud });
+$('s-iva').addEventListener('change', totalSolicitud);
+$('s-met').addEventListener('change', () => { if ($('s-met').value === 'PPD') $('s-forma').value = '99'; });
 
 /* ---------- Datos SAT ---------- */
 async function cargaSAT(c){
