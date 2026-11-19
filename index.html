@@ -259,6 +259,9 @@
   .deadline[hidden],.sync[hidden]{display:none!important}
   .cl-sel{font:inherit;font-size:12.5px;padding:7px 11px;border-radius:9px;border:1px solid var(--line);
     background:var(--surface);color:var(--ink);max-width:230px;cursor:pointer}
+  .cl-sel option{color:var(--ink)}
+  .cl-sel .cl-inactivo, .cl-sel optgroup.cl-inactivo option{color:#b9bdb6}
+  .cl-sel optgroup.cl-inactivo{color:#9aa096;font-style:normal}
   .cl-sel:focus{outline:2px solid var(--green-br);border-color:transparent}
   .sync.stale{background:var(--warn-wash);color:#8A6410;border-color:#E8D3A0}
   .sync.stale .dot{background:var(--warn);box-shadow:0 0 0 3px rgba(200,145,46,.18)}
@@ -603,14 +606,21 @@ async function arranca(){
   if (!cls || !cls.length) { $('gate_msg').style.display='block'; $('gate_msg').className='msg err';
     $('gate_msg').innerHTML = 'Tu usuario no tiene ninguna empresa asignada todavía. Escríbenos a <b>fonseca@financialcr.com</b>.'; return; }
 
+  // Activos primero en orden alfabético; los inactivos al final, en gris claro
+  cls.sort((a, b) => ((b.is_active !== false) - (a.is_active !== false)) ||
+    String(a.name || a.code || '').localeCompare(String(b.name || b.code || ''), 'es', { sensitivity: 'base' }));
   CLIENTES = cls;
   const sel = $('cl-sel');
   if (cls.length > 1) {
     sel.hidden = false;
-    sel.innerHTML = cls.map(c => '<option value="' + esc(c.client_id) + '">' + esc(c.code || c.rfc) + ' · ' + esc(c.name || '') + '</option>').join('');
+    const opt = c => '<option value="' + esc(c.client_id) + '"' + (c.is_active === false ? ' class="cl-inactivo"' : '') + '>' +
+      esc(c.name || c.code || c.rfc) + ' · ' + esc(c.code || c.rfc) + '</option>';
+    const act = cls.filter(c => c.is_active !== false), ina = cls.filter(c => c.is_active === false);
+    sel.innerHTML = act.map(opt).join('') +
+      (ina.length ? '<optgroup label="Inactivos" class="cl-inactivo">' + ina.map(opt).join('') + '</optgroup>' : '');
     sel.addEventListener('change', () => cargaCliente(cls.find(c => c.client_id === sel.value)));
   }
-  const conDatos = cls.find(c => c.periodo_balanza) || cls[0];
+  const conDatos = cls.find(c => c.periodo_balanza && c.is_active !== false) || cls.find(c => c.periodo_balanza) || cls[0];
   if (cls.length > 1) sel.value = conDatos.client_id;
   $('btn-salir').textContent = iniciales(session.user.email.split('@')[0]);
   abrirApp();
