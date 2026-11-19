@@ -567,6 +567,14 @@
       </div>
 
       <div class="card" style="margin-bottom:16px">
+        <div class="card-h"><span class="card-t">Declaraciones presentadas</span><span class="pill" id="dec-pill">Acuses del SAT</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Periodo</th><th>Tipo</th><th>Presentada</th><th>No. de operación</th><th>Detalle</th><th style="text-align:right">A pagar</th><th>Estatus</th></tr></thead>
+          <tbody id="dec-body"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
         <div class="card-h"><span class="card-t">Cálculo mensual del ejercicio</span><span class="pill" id="imp-base">—</span></div>
         <div class="tbl-wrap"><table>
           <thead><tr><th>Periodo</th><th style="text-align:right">ISR</th><th style="text-align:right">IVA causado</th><th style="text-align:right">IVA acreditable</th><th style="text-align:right">Retenciones</th><th style="text-align:right">Total</th><th>Estatus</th></tr></thead>
@@ -987,11 +995,36 @@ $('ff-per').addEventListener('change', () => { const r = $('ff-per').value === '
   $('ff-rango-d').hidden = $('ff-rango-h').hidden = !r; FAC.limite = 100; renderFac(); });
 
 /* ---------- Impuestos ---------- */
+async function cargaDeclaraciones(c){
+  const { data } = await DB.from('declaraciones')
+    .select('periodo,tipo,tipo_declaracion,fecha_presentacion,vencimiento,num_operacion,conceptos,total_a_pagar,linea_captura,vigente_hasta,pagada,importe_pagado')
+    .eq('client_id', c.client_id).order('periodo', {ascending:false});
+  const rows = data || [], b = $('dec-body');
+  if (!rows.length) { vacio(b, 'Aún no hay acuses cargados para esta empresa.'); return rows; }
+  b.innerHTML = rows.map(r => {
+    const det = (r.conceptos || []).filter(x => x.a_cargo || x.a_favor || x.a_pagar).map(x =>
+      esc(x.concepto) + ': ' + (x.a_favor ? 'a favor ' + MXN(x.a_favor, 0) : 'a cargo ' + MXN(x.a_cargo || 0, 0)) +
+      (x.compensaciones ? ' (compensado ' + MXN(x.compensaciones, 0) + ')' : '') + (x.recargos ? ' + recargos ' + MXN(x.recargos, 0) : '')).join('<br>');
+    const tot = N(r.total_a_pagar) || 0;
+    const est = r.pagada || tot === 0 ? '<span class="badge b-ok">' + (tot === 0 ? 'Sin pago' : 'Pagada') + '</span>'
+      : '<span class="badge b-warn">Por pagar</span>' + (r.linea_captura ? '<div style="font-size:11px;color:var(--muted);margin-top:3px">Línea ' + esc(r.linea_captura) +
+        (r.vigente_hasta ? ' · vence ' + fecha(r.vigente_hasta) : '') + '</div>' : '');
+    return '<tr><td class="t-strong">' + periodoLargo(r.periodo) + '</td><td>' + esc(r.tipo_declaracion || 'Normal') + '</td>' +
+      '<td class="tnum">' + fecha(r.fecha_presentacion) + '</td><td class="tnum">' + esc(r.num_operacion || '—') + '</td>' +
+      '<td style="font-size:12px;color:var(--muted)">' + (det || '—') + '</td>' +
+      '<td style="text-align:right" class="money"><b>' + MXN(tot) + '</b></td><td>' + est + '</td></tr>';
+  }).join('');
+  return rows;
+}
 async function cargaImpuestos(c){
-  const { data } = await DB.from('impuestos')
+  const [{ data }, decs] = await Promise.all([ DB.from('impuestos')
     .select('periodo,isr,iva_causado,iva_acreditable,ret_isr,ret_iva,retenciones,importe_total,fecha_limite,presentada,pagada,base_calculo')
-    .eq('client_id', c.client_id).order('periodo');
-  const rows = data || [], b = $('imp-body');
+    .eq('client_id', c.client_id).order('periodo'), cargaDeclaraciones(c) ]);
+  const declarado = {};
+  (decs || []).forEach(d => { const m = String(d.periodo).slice(0,7);
+    declarado[m] = declarado[m] || { pagada: true }; if (!d.pagada && N(d.total_a_pagar)) declarado[m].pagada = false; });
+  const rows = (data || []).map(r => { const d = declarado[String(r.periodo).slice(0,7)];
+    return d ? Object.assign({}, r, { presentada: true, pagada: d.pagada }) : r; }), b = $('imp-body');
   if (!rows.length) { vacio(b, 'Sin cálculo de impuestos cargado.'); $('imp-base').textContent = '—'; return; }
   $('imp-base').textContent = rows[0].base_calculo === 'cobros_y_pagos' ? 'Base: cobros y pagos' : 'Base: CFDI (previo)';
   b.innerHTML = rows.map(r => {
