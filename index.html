@@ -577,7 +577,7 @@
       <div class="card" style="margin-bottom:16px">
         <div class="card-h"><span class="card-t">Cálculo mensual del ejercicio</span><span class="pill" id="imp-base">—</span></div>
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Periodo</th><th style="text-align:right">ISR</th><th style="text-align:right">IVA causado</th><th style="text-align:right">IVA acreditable</th><th style="text-align:right">Retenciones</th><th style="text-align:right">Total</th><th>Estatus</th></tr></thead>
+          <thead><tr><th>Periodo</th><th style="text-align:right">ISR</th><th style="text-align:right">IVA (neto)</th><th style="text-align:right">IVA acreditable</th><th style="text-align:right">Retenciones</th><th style="text-align:right">Total</th><th>Estatus</th></tr></thead>
           <tbody id="imp-body"></tbody>
         </table></div>
       </div>
@@ -1020,13 +1020,26 @@ async function cargaImpuestos(c){
   const [{ data }, decs] = await Promise.all([ DB.from('impuestos')
     .select('periodo,isr,iva_causado,iva_acreditable,ret_isr,ret_iva,retenciones,importe_total,fecha_limite,presentada,pagada,base_calculo')
     .eq('client_id', c.client_id).order('periodo'), cargaDeclaraciones(c) ]);
+  // Meses con acuse: se muestran las cifras DECLARADAS (suma de todas las declaraciones del mes);
+  // meses sin acuse: el cálculo estimado.
   const declarado = {};
   (decs || []).forEach(d => { const m = String(d.periodo).slice(0,7);
-    declarado[m] = declarado[m] || { pagada: true }; if (!d.pagada && N(d.total_a_pagar)) declarado[m].pagada = false; });
-  const rows = (data || []).map(r => { const d = declarado[String(r.periodo).slice(0,7)];
-    return d ? Object.assign({}, r, { presentada: true, pagada: d.pagada }) : r; }), b = $('imp-body');
+    const x = declarado[m] = declarado[m] || { pagada: true, isr: 0, iva: 0, ret: 0, tot: 0, n: 0 };
+    x.n++; x.tot += N(d.total_a_pagar) || 0; if (!d.pagada && N(d.total_a_pagar)) x.pagada = false;
+    (d.conceptos || []).forEach(k => { const c = String(k.concepto || '').toLowerCase();
+      const neto = (N(k.a_cargo) || 0) - (N(k.a_favor) || 0);
+      if (/retenc/.test(c)) x.ret += N(k.a_cargo) || 0;
+      else if (/isr/.test(c)) x.isr += neto;
+      else if (/iva|valor agregado/.test(c)) x.iva += neto; }); });
+  const base = {};
+  (data || []).forEach(r => base[String(r.periodo).slice(0,7)] = r);
+  Object.keys(declarado).forEach(m => { if (!base[m]) base[m] = { periodo: m + '-01' }; });
+  const rows = Object.keys(base).sort().map(m => { const r = base[m], d = declarado[m];
+    return d ? { periodo: r.periodo, isr: d.isr, iva_causado: d.iva, iva_acreditable: null, ret_isr: d.ret, ret_iva: 0,
+      importe_total: d.tot, presentada: true, pagada: d.pagada, fuente: 'acuse', fecha_limite: r.fecha_limite }
+      : Object.assign({ fuente: 'estimado' }, r); }), b = $('imp-body');
   if (!rows.length) { vacio(b, 'Sin cálculo de impuestos cargado.'); $('imp-base').textContent = '—'; return; }
-  $('imp-base').textContent = rows[0].base_calculo === 'cobros_y_pagos' ? 'Base: cobros y pagos' : 'Base: CFDI (previo)';
+  $('imp-base').textContent = 'Declarado según acuse · estimado donde aún no hay acuse';
   b.innerHTML = rows.map(r => {
     const ret = (N(r.ret_isr)||0) + (N(r.ret_iva)||0) || N(r.retenciones) || 0;
     const tot = N(r.importe_total);
@@ -1039,7 +1052,8 @@ async function cargaImpuestos(c){
       '<td style="text-align:right" class="money">' + MXN(N(r.iva_acreditable)) + '</td>' +
       '<td style="text-align:right" class="money">' + MXN(ret) + '</td>' +
       '<td style="text-align:right" class="money"><b>' + MXN(tot) + '</b></td>' +
-      '<td><span class="badge ' + est[0] + '">' + est[1] + '</span></td></tr>';
+      '<td><span class="badge ' + est[0] + '">' + est[1] + '</span><div style="font-size:10.5px;color:var(--faint);margin-top:2px">' +
+      (r.fuente === 'acuse' ? 'Según acuse' : 'Estimado') + '</div></td></tr>';
   }).join('');
 
   const sum = f => rows.reduce((a, r) => a + (N(r[f]) || 0), 0);
