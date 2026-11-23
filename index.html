@@ -288,6 +288,10 @@
     font-size:.84rem;line-height:1.45}
   #gate .foot{margin-top:20px;font-size:.74rem;color:#A2A6A0;text-align:center;line-height:1.5}
   #gate .foot a{color:#698A34;text-decoration:none;font-weight:600}
+  #gate .gate-links{display:flex;flex-direction:column;gap:7px;margin-top:12px;font-size:.78rem;text-align:center}
+  #gate .gate-links a{color:#698A34;text-decoration:none;font-weight:600}
+  #gate .gate-links a:hover{text-decoration:underline}
+  #gate [hidden]{display:none!important}
   #gate .msg.ok{background:#EEF3E2;color:#49652E}
   #gate .msg.err{background:#F8E9E5;color:#A8412C}
   .deadline[hidden],.sync[hidden]{display:none!important}
@@ -320,12 +324,25 @@
     <div class="brand">
       <img src="logo.png" alt="Financial Controlling &amp; Reporting" style="width:186px;height:auto;display:block">
     </div>
+    <div id="gate_login">
     <h1>Entra a tu información</h1>
-    <p class="sub">Te mandamos una liga de acceso a tu correo. Sin contraseñas que recordar.</p>
+    <p class="sub">Usa tu correo y tu contraseña.</p>
     <form onsubmit="return gateLogin(event)">
-      <div class="f"><label>Correo</label><input type="email" id="gate_user" placeholder="nombre@empresa.com" required autocomplete="email"></div>
-      <button class="btn" type="submit" id="gate_btn">Enviarme la liga de acceso</button>
+      <div class="f"><label>Correo</label><input type="email" id="gate_user" placeholder="nombre@empresa.com" required autocomplete="username"></div>
+      <div class="f"><label>Contraseña</label><input type="password" id="gate_pass" required autocomplete="current-password"></div>
+      <button class="btn" type="submit" id="gate_btn">Entrar</button>
     </form>
+    <div class="gate-links"><a href="#" onclick="return gateOlvide(event)">¿Primer acceso u olvidaste tu contraseña?</a><a href="#" onclick="return gateLiga(event)">Mejor envíame una liga de acceso</a></div>
+    </div>
+    <div id="gate_pw" hidden>
+    <h1>Crea tu contraseña</h1>
+    <p class="sub">Es tu primer acceso. Elige una contraseña de al menos 8 caracteres, con letras y números.</p>
+    <form onsubmit="return gateCreaPassword(event)">
+      <div class="f"><label>Nueva contraseña</label><input type="password" id="gate_pw1" required minlength="8" autocomplete="new-password"></div>
+      <div class="f"><label>Repítela</label><input type="password" id="gate_pw2" required minlength="8" autocomplete="new-password"></div>
+      <button class="btn" type="submit" id="gate_pw_btn">Guardar y entrar</button>
+    </form>
+    </div>
     <div id="gate_msg" class="msg"></div>
     <div class="divider">o</div>
     <button class="btn ghost" onclick="verPrototipo()">Ver una demostración</button>
@@ -702,22 +719,59 @@ function go(view){
 $('nav').addEventListener('click', e => { const b = e.target.closest('.nav-item'); if(b) go(b.dataset.view); });
 
 /* ---------- sesión ---------- */
+function gateMsg(tipo, html){ const m = $('gate_msg'); m.style.display = 'block'; m.className = 'msg ' + tipo; m.innerHTML = html; }
 async function gateLogin(e){
   e.preventDefault();
-  const email = $('gate_user').value.trim();
-  const m = $('gate_msg'), btn = $('gate_btn');
-  btn.disabled = true; btn.textContent = 'Enviando…';
-  const { error } = await sb.auth.signInWithOtp({
-    email, options: { emailRedirectTo: window.location.origin }
-  });
-  btn.disabled = false; btn.textContent = 'Enviarme la liga de acceso';
-  m.style.display = 'block';
-  if (error) { m.className = 'msg err'; m.textContent = 'No se pudo enviar: ' + error.message; }
-  else { m.className = 'msg ok';
-    m.innerHTML = 'Listo. Te mandamos una liga a <b>' + esc(email) + '</b>. Ábrela en este mismo navegador.'; }
+  const email = $('gate_user').value.trim(), password = $('gate_pass').value, btn = $('gate_btn');
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error) gateMsg('err', /invalid/i.test(error.message)
+    ? 'Correo o contraseña incorrectos. Si es tu primer acceso, usa "¿Primer acceso u olvidaste tu contraseña?".'
+    : 'No se pudo entrar: ' + esc(error.message));
   return false;
 }
-window.gateLogin = gateLogin;
+async function gateOlvide(e){
+  e.preventDefault();
+  const email = $('gate_user').value.trim();
+  if (!email) { gateMsg('err', 'Escribe primero tu correo.'); return false; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+  if (error) gateMsg('err', 'No se pudo enviar: ' + esc(error.message));
+  else gateMsg('ok', 'Te mandamos a <b>' + esc(email) + '</b> una liga para crear tu contraseña. Ábrela en este mismo navegador.');
+  return false;
+}
+async function gateLiga(e){
+  e.preventDefault();
+  const email = $('gate_user').value.trim();
+  if (!email) { gateMsg('err', 'Escribe primero tu correo.'); return false; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin, shouldCreateUser: false } });
+  if (error) gateMsg('err', /not found|signups not allowed/i.test(error.message)
+    ? 'Ese correo no tiene acceso. Escríbenos a <b>fonseca@financialcr.com</b>.' : 'No se pudo enviar: ' + esc(error.message));
+  else gateMsg('ok', 'Listo. Te mandamos una liga a <b>' + esc(email) + '</b>. Ábrela en este mismo navegador.');
+  return false;
+}
+function pidePassword(){
+  document.body.style.overflow = 'hidden';
+  $('gate_login').hidden = true; $('gate_pw').hidden = false; $('gate_msg').style.display = 'none';
+}
+async function gateCreaPassword(e){
+  e.preventDefault();
+  const p1 = $('gate_pw1').value, p2 = $('gate_pw2').value, btn = $('gate_pw_btn');
+  if (p1 !== p2) { gateMsg('err', 'Las dos contraseñas no coinciden.'); return false; }
+  if (p1.length < 8 || !/[A-Za-z]/.test(p1) || !/[0-9]/.test(p1)) { gateMsg('err', 'Usa al menos 8 caracteres, con letras y números.'); return false; }
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  if (error) { btn.disabled = false; btn.textContent = 'Guardar y entrar';
+    gateMsg('err', /same|different/i.test(error.message) ? 'Elige una contraseña distinta a la anterior.' : 'No se pudo guardar: ' + esc(error.message)); return false; }
+  await sb.rpc('portal_password_cambiada');
+  RECOVERY = false;
+  $('gate_pw').hidden = true; $('gate_login').hidden = false;
+  gateMsg('ok', 'Contraseña guardada. Entrando…');
+  arranca(true);
+  return false;
+}
+Object.assign(window, { gateLogin, gateOlvide, gateLiga, gateCreaPassword });
+let RECOVERY = /type=(recovery|invite)/.test(location.hash);
 
 function abrirApp(){ const g = $('gate'); if(g){ g.style.transition='opacity .25s'; g.style.opacity='0';
   setTimeout(()=>{ g.remove(); document.body.style.overflow=''; }, 250); } }
@@ -730,9 +784,16 @@ $('btn-salir').addEventListener('click', async () => {
 /* ---------- estado ---------- */
 let CLIENTES = [], ACTUAL = null, DB = sb, DEMO = false;
 
-async function arranca(){
+let ARRANCADO = false;
+async function arranca(forzar){
+  if (ARRANCADO && !forzar) return;
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { document.body.style.overflow = 'hidden'; return; }
+  // Primer acceso o recuperación: crear contraseña antes de entrar
+  if (RECOVERY) { pidePassword(); return; }
+  const { data: yo } = await sb.rpc('portal_mi_usuario');
+  if (yo && yo[0] && yo[0].debe_cambiar_password) { pidePassword(); return; }
+  ARRANCADO = true;
 
   const { data: cls, error } = await DB.from('v_portal_kpis')
     .select('*').order('code');
@@ -1382,7 +1443,7 @@ function verPrototipo(){
 window.verPrototipo = verPrototipo;
 
 /* ---------- inicio ---------- */
-sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_IN') arranca(); });
+sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') { RECOVERY = true; pidePassword(); } else if (ev === 'SIGNED_IN') setTimeout(arranca, 0); });
 arranca();
 
 </script>
