@@ -1058,7 +1058,7 @@ $('ff-per').addEventListener('change', () => { const r = $('ff-per').value === '
 /* ---------- Impuestos ---------- */
 async function cargaDeclaraciones(c){
   const { data } = await DB.from('declaraciones')
-    .select('periodo,tipo,tipo_declaracion,fecha_presentacion,vencimiento,num_operacion,conceptos,total_a_pagar,linea_captura,vigente_hasta,pagada,importe_pagado')
+    .select('periodo,tipo,tipo_declaracion,fecha_presentacion,vencimiento,num_operacion,conceptos,total_a_pagar,linea_captura,vigente_hasta,pagada,importe_pagado,sustituida_por')
     .eq('client_id', c.client_id).order('periodo', {ascending:false});
   const rows = data || [], b = $('dec-body');
   if (!rows.length) { vacio(b, 'Aún no hay acuses cargados para esta empresa.'); return rows; }
@@ -1067,10 +1067,11 @@ async function cargaDeclaraciones(c){
       esc(x.concepto) + ': ' + (x.a_favor ? 'a favor ' + MXN(x.a_favor, 0) : 'a cargo ' + MXN(x.a_cargo || 0, 0)) +
       (x.compensaciones ? ' (compensado ' + MXN(x.compensaciones, 0) + ')' : '') + (x.recargos ? ' + recargos ' + MXN(x.recargos, 0) : '')).join('<br>');
     const tot = N(r.total_a_pagar) || 0;
-    const est = r.pagada || tot === 0 ? '<span class="badge b-ok">' + (tot === 0 ? 'Sin pago' : 'Pagada') + '</span>'
+    const est = r.sustituida_por ? '<span class="badge b-gray" title="Sustituida por la complementaria ' + esc(r.sustituida_por) + '">Sustituida</span>'
+      : r.pagada || tot === 0 ? '<span class="badge b-ok">' + (tot === 0 ? 'Sin pago' : 'Pagada') + '</span>'
       : '<span class="badge b-warn">Por pagar</span>' + (r.linea_captura ? '<div style="font-size:11px;color:var(--muted);margin-top:3px">Línea ' + esc(r.linea_captura) +
         (r.vigente_hasta ? ' · vence ' + fecha(r.vigente_hasta) : '') + '</div>' : '');
-    return '<tr><td class="t-strong">' + periodoLargo(r.periodo) + '</td><td>' + esc(r.tipo_declaracion || 'Normal') + '</td>' +
+    return '<tr' + (r.sustituida_por ? ' style="opacity:.55"' : '') + '><td class="t-strong">' + periodoLargo(r.periodo) + '</td><td>' + esc(r.tipo_declaracion || 'Normal') + '</td>' +
       '<td class="tnum">' + fecha(r.fecha_presentacion) + '</td><td class="tnum">' + esc(r.num_operacion || '—') + '</td>' +
       '<td style="font-size:12px;color:var(--muted)">' + (det || '—') + '</td>' +
       '<td style="text-align:right" class="money"><b>' + MXN(tot) + '</b></td><td>' + est + '</td></tr>';
@@ -1084,7 +1085,7 @@ async function cargaImpuestos(c){
   // Meses con acuse: se muestran las cifras DECLARADAS (suma de todas las declaraciones del mes);
   // meses sin acuse: el cálculo estimado.
   const declarado = {};
-  (decs || []).forEach(d => { const m = String(d.periodo).slice(0,7);
+  (decs || []).filter(d => !d.sustituida_por).forEach(d => { const m = String(d.periodo).slice(0,7);
     const x = declarado[m] = declarado[m] || { pagada: true, isr: 0, iva: 0, ret: 0, tot: 0, n: 0 };
     x.n++; x.tot += N(d.total_a_pagar) || 0; if (!d.pagada && N(d.total_a_pagar)) x.pagada = false;
     (d.conceptos || []).forEach(k => { const c = String(k.concepto || '').toLowerCase();
