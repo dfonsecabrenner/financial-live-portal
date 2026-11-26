@@ -622,7 +622,19 @@
     <section class="view" id="documentos">
       <div class="page-head"><div class="page-title">Expediente <em>Fiscal</em></div><div class="page-sub">Tu papeleo contable-fiscal, ordenado y descargable.</div></div>
       <div class="grid doc-grid" id="doc-grid"></div>
-      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> <span id="doc-nota">Da clic en una tarjeta para abrir el detalle. Los documentos de tu carpeta (constancias, acuses, opiniones de cumplimiento) se conectarán aquí próximamente.</span></div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-h"><span class="card-t">Documentos de tu carpeta</span><span class="pill" id="dc-n">—</span></div>
+        <div class="filtros">
+          <label>Tipo<select id="dc-cat" class="w-m"><option value="">Todos</option></select></label>
+          <label>Año<select id="dc-anio" class="w-s"><option value="">Todos</option></select></label>
+          <label>Buscar<input id="dc-q" class="w-l" placeholder="Nombre del archivo"></label>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Periodo</th><th>Documento</th><th></th></tr></thead>
+          <tbody id="dc-body"></tbody>
+        </table></div>
+      </div>
+      <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg> <span id="doc-nota">Da clic en una tarjeta para abrir el detalle. Abajo están los documentos de tu carpeta (acuses, pagos, constancias, opiniones de cumplimiento); se actualizan cada noche.</span></div>
     </section>
 
     <!-- BALANZA -->
@@ -843,7 +855,7 @@ async function cargaCliente(c){
 
   pintaResumen(c);
   await Promise.all([ cargaER(c), cargaFlujo(c), cargaFacturas(c), cargaImpuestos(c),
-                      cargaConciliacion(c), cargaFrescura(c), cargaSAT(c), cargaHistorial(c), cargaBalanza(c) ]);
+                      cargaConciliacion(c), cargaFrescura(c), cargaSAT(c), cargaHistorial(c), cargaBalanza(c), cargaDocumentos(c) ]);
   renderMeses();
 }
 
@@ -1205,6 +1217,52 @@ async function cargaFrescura(c){
     '<div class="card doc-card" onclick="' + d[3] + '"><div class="doc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
     d[0] + '</svg></div><div class="doc-t">' + d[1] + '</div><div class="doc-d">' + d[2] + '</div></div>').join('');
 }
+
+/* ---------- Documentos de Drive ---------- */
+const CAT_DOC = { acuse_declaracion:'Acuse de declaración', pago_impuestos:'Pago de impuestos', opinion_cumplimiento:'Opinión de cumplimiento',
+  constancia_situacion_fiscal:'Constancia de situación fiscal', diot:'DIOT', contabilidad_electronica:'Contabilidad electrónica',
+  estado_cuenta:'Estado de cuenta', factura:'Factura', reporte_contable:'Reporte contable', otro:'Otro' };
+let DOCS = [];
+async function cargaDocumentos(c){
+  const { data } = await DB.from('documentos').select('id,categoria,nombre,fecha,periodo,mime,drive_file_id')
+    .eq('client_id', c.client_id).order('fecha', {ascending:false}).limit(3000);
+  DOCS = data || [];
+  const cats = [...new Set(DOCS.map(d => d.categoria))].sort((a,b) => (CAT_DOC[a]||a).localeCompare(CAT_DOC[b]||b,'es'));
+  $('dc-cat').innerHTML = '<option value="">Todos</option>' + cats.map(k => '<option value="' + esc(k) + '">' + esc(CAT_DOC[k] || k) + '</option>').join('');
+  const anios = [...new Set(DOCS.map(d => String(d.periodo || d.fecha || '').slice(0,4)).filter(Boolean))].sort().reverse();
+  $('dc-anio').innerHTML = '<option value="">Todos</option>' + anios.map(a => '<option>' + a + '</option>').join('');
+  renderDocumentos();
+}
+function renderDocumentos(){
+  const cat = $('dc-cat').value, an = $('dc-anio').value, q = $('dc-q').value.trim().toLowerCase(), b = $('dc-body');
+  const rows = DOCS.filter(d => (!cat || d.categoria === cat) && (!an || String(d.periodo || d.fecha || '').startsWith(an)) &&
+    (!q || String(d.nombre || '').toLowerCase().includes(q)));
+  $('dc-n').textContent = rows.length.toLocaleString('es-MX') + ' documentos';
+  if (!rows.length) { vacio(b, DOCS.length ? 'Sin documentos con esos filtros.' : 'Aún no hay documentos ligados a esta empresa.'); return; }
+  b.innerHTML = rows.slice(0, 500).map(d => '<tr><td class="tnum">' + fecha(d.fecha) + '</td><td>' + esc(CAT_DOC[d.categoria] || d.categoria) + '</td>' +
+    '<td>' + (d.periodo ? periodoLargo(d.periodo) : '—') + '</td><td class="t-strong" style="word-break:break-word">' + esc(d.nombre) + '</td>' +
+    '<td style="text-align:right"><button class="btn-s" onclick="bajaDocumento(\'' + esc(d.id) + '\', this)">Descargar</button></td></tr>').join('');
+}
+async function bajaDocumento(id, btn){
+  if (DEMO) { alert('Demostración: la descarga no está disponible.'); return; }
+  const txt = btn.textContent; btn.disabled = true; btn.textContent = 'Descargando…';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch(SB_URL + '/functions/v1/portal-documento?id=' + encodeURIComponent(id),
+      { headers: { Authorization: 'Bearer ' + session.access_token, apikey: SB_KEY } });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || ('Error ' + r.status)); }
+    const cd = r.headers.get('content-disposition') || '', m = cd.match(/filename\*=UTF-8''([^;]+)/);
+    const nombre = m ? decodeURIComponent(m[1]) : 'documento';
+    const url = URL.createObjectURL(await r.blob());
+    const a = document.createElement('a'); a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    btn.textContent = txt;
+  } catch (e) { btn.textContent = 'No disponible'; btn.title = e.message; setTimeout(() => { btn.textContent = txt; }, 4000); }
+  btn.disabled = false;
+}
+Object.assign(window, { bajaDocumento });
+['dc-cat','dc-anio'].forEach(id => $(id).addEventListener('change', renderDocumentos));
+$('dc-q').addEventListener('input', renderDocumentos);
 
 /* ---------- Balanza ---------- */
 let BZ = [];
