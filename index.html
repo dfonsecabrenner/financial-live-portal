@@ -818,6 +818,7 @@ async function arranca(forzar){
   }
   const conDatos = cls.find(c => c.periodo_balanza && c.is_active !== false) || cls.find(c => c.periodo_balanza) || cls[0];
   if (cls.length > 1) sel.value = conDatos.client_id;
+  window.__email = session.user.email;
   $('btn-salir').textContent = iniciales(session.user.email.split('@')[0]);
   abrirApp();
   await cargaCliente(conDatos);
@@ -1266,6 +1267,28 @@ function abrirSolicitud(){
   $('s-msg').textContent = ''; $('s-btn').disabled = false; $('sol-modal').hidden = false;
 }
 function cierraSolicitud(){ $('sol-modal').hidden = true; }
+/* Aviso por correo al contador (facturas@) con copia a Dani. Solo datos mínimos:
+   los datos del receptor se quedan en el portal, no viajan en el correo. */
+const AVISO_TO = 'facturas@financialcr.com', AVISO_CC = 'fonseca@financialcr.com';
+function avisaSolicitud(reg){
+  try {
+    const cli = (ACTUAL.name || ACTUAL.code || ACTUAL.rfc) + ' (' + (ACTUAL.code || ACTUAL.rfc) + ')';
+    const fmt = n => Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    fetch('https://formsubmit.co/ajax/' + AVISO_TO, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: 'Nueva solicitud de factura — ' + cli,
+        _cc: AVISO_CC, _template: 'table', _captcha: 'false',
+        Cliente: cli,
+        Solicitada_por: (window.__email || ''),
+        Total: fmt(reg.total) + ' ' + reg.moneda + ' (' + reg.metodo_pago + ')',
+        Conceptos: reg.conceptos.length,
+        Detalle: 'Los datos completos del receptor y los conceptos están en el portal: https://portal.financialcr.com'
+      })
+    }).catch(() => {});
+  } catch (_) {}
+}
+
 async function enviaSolicitud(e){
   e.preventDefault();
   const t = totalSolicitud();
@@ -1283,6 +1306,7 @@ async function enviaSolicitud(e){
   if (DEMO) { $('s-msg').innerHTML = '<span style="color:var(--green-d)">Demostración: la solicitud no se envía.</span>'; return false; }
   const { error } = await sb.from('solicitudes_factura').insert(reg);
   if (error) { $('s-btn').disabled = false; $('s-msg').innerHTML = '<span style="color:var(--neg)">No se pudo enviar: ' + esc(error.message) + '</span>'; return false; }
+  avisaSolicitud(reg);
   $('s-msg').innerHTML = '<span style="color:var(--green-d)">Listo. Tu contador la emite y te avisa.</span>';
   setTimeout(cierraSolicitud, 1800);
   return false;
